@@ -24,11 +24,7 @@ def visualize_state_machine(
     for state_name, state in parser.get_all_states().items():
         # Set node attributes based on state type
         node_attrs = {
-            "shape": "circle"
-            if state.type == "start"
-            else "doublecircle"
-            if state.type == "end"
-            else "rectangle",
+            "shape": "rectangle",
             "style": "filled",
             "fillcolor": "#90EE90"
             if state.type == "start"
