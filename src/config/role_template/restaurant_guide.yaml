@@ -1,0 +1,71 @@
+# State Machine Configuration Template
+
+# Define the states of the state machine
+states:
+  - name: initial
+    type: start
+    transitions:
+      - to: information_collection
+
+  - name: information_collection
+    type: action
+    subtasks:
+      - ask_geo_location
+      - ask_credit_card_type_issuer
+      - ask_price_range
+      - ask_rating_range
+      - ask_customize_preferences
+    transitions:
+      - to: restaurant_recommendation
+        condition: information_collected
+      - to: error
+        condition: collection_failed
+
+  - name: restaurant_recommendation
+    type: action
+    transitions:
+      - to: restaurant_detail_retrieval
+        condition: details_requested
+      - to: information_collection
+        condition: request_to_update_filter_criteria
+      - to: error
+        condition: recommendation_failed
+
+  - name: restaurant_detail_retrieval
+    type: action
+    transitions:
+      - to: information_collection
+        condition: request_to_update_filter_criteria
+      - to: success
+        condition: details_retrieved
+      - to: error
+        condition: retrieval_failed
+
+  - name: success
+    type: end
+
+  - name: error
+    type: end
+
+# Define properties for each state
+properties:
+  initial:
+    description: "The start state where the process begins."
+  information_collection:
+    description: "Collecting information from the user."
+  ask_geo_location:
+    description: "Asking the user for their geographical location."
+  ask_credit_card_type_issuer:
+    description: "Asking the user for their credit card type and issuer."
+  ask_price_range:
+    description: "Asking the user about their preferred price range."
+  ask_rating_range:
+    description: "Asking the user about their preferred restaurant rating."
+  restaurant_recommendation:
+    description: "Recommending a restaurant based on collected information."
+  restaurant_detail_retrieval:
+    description: "Retrieving details of the recommended restaurant."
+  success:
+    description: "End state indicating a successful process."
+  error:
+    description: "End state indicating an error occurred."
