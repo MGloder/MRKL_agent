@@ -2,10 +2,12 @@ import graphviz
 from src.core.parser.role import RoleTemplateParser
 
 
-def visualize_state_machine(template_path: str, output_path: str = "state_machine") -> None:
+def visualize_state_machine(
+    template_path: str, output_path: str = "state_machine"
+) -> None:
     """
     Visualize the state machine defined in the YAML template using Graphviz.
-    
+
     Args:
         template_path: Path to the YAML template file
         output_path: Path where the visualization should be saved (without extension)
@@ -15,18 +17,26 @@ def visualize_state_machine(template_path: str, output_path: str = "state_machin
     parser.parse()
 
     # Create a new directed graph
-    dot = graphviz.Digraph(comment='State Machine Visualization')
-    dot.attr(rankdir='LR')  # Left to right layout
+    dot = graphviz.Digraph(comment="State Machine Visualization")
+    dot.attr(rankdir="LR")  # Left to right layout
 
     # Add nodes (states)
     for state_name, state in parser.get_all_states().items():
         # Set node attributes based on state type
         node_attrs = {
-            'shape': 'circle' if state.type == 'start' else 'doublecircle' if state.type == 'end' else 'rectangle',
-            'style': 'filled',
-            'fillcolor': '#90EE90' if state.type == 'start' else '#FFB6C1' if state.type == 'end' else '#ADD8E6',
-            'width': '0.5',  # Set width of the node
-            'height': '0.5',  # Set height of the node
+            "shape": "circle"
+            if state.type == "start"
+            else "doublecircle"
+            if state.type == "end"
+            else "rectangle",
+            "style": "filled",
+            "fillcolor": "#90EE90"
+            if state.type == "start"
+            else "#FFB6C1"
+            if state.type == "end"
+            else "#ADD8E6",
+            "width": "0.5",  # Set width of the node
+            "height": "0.5",  # Set height of the node
         }
 
         # Add label with description if available
@@ -47,7 +57,7 @@ def visualize_state_machine(template_path: str, output_path: str = "state_machin
             dot.edge(state_name, transition.to, edge_label)
 
     # Save the visualization
-    dot.render(output_path, format='png', cleanup=True)
+    dot.render(output_path, format="png", cleanup=True)
     print(f"Visualization saved to {output_path}.png")
 
 
