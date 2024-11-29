@@ -59,5 +59,5 @@ def visualize_state_machine(
 
 if __name__ == "__main__":
     # Example usage
-    file_path = "/Users/machinedoll/Projects/TrustAI/MRKL_agent/src/config/role_template/restaurant_guide.yaml"
+    file_path = "/config/role_template/restaurant_guide_role.yaml"
     visualize_state_machine(file_path)
