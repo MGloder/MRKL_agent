@@ -1,6 +1,21 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
-from src.core.parser.role import RoleTemplateParser, State
+from src.core.parser.role import RoleTemplateParser
+
+
+@dataclass
+class Transition:
+    to: str
+    condition: Optional[str] = None
+
+
+@dataclass
+class State:
+    name: str
+    type: str
+    transitions: List[Transition]
+    subtasks: List[str] = None
+    description: Optional[str] = None
 
 
 @dataclass

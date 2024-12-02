@@ -1,9 +1,15 @@
+from core.entity.unified_context import UnifiedContext
+from service.context import get_context_by_session_id
+
+
 class IntentDetector:
     def __init__(self):
         ...
 
-    def _get_current_context(self, user_id: str, session_id: str):
-        ...
+    def _get_current_context(self, session_id: str) -> UnifiedContext:
+        """Get context for intent detector to infer the relevant information."""
+        return get_context_by_session_id(session_id)
 
-    def predict(self, text):
+    def detect_intent(self, session_id: str, raw_query: str) -> str:
+        """Detect intent from the given message."""
         ...

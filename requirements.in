@@ -2,3 +2,5 @@ PyYAML
 graphviz
 openai
 python-dotenv
+# testing
+pytest

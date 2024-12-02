@@ -1,21 +1,8 @@
-from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import Dict, Optional
+
 import yaml
 
-
-@dataclass
-class Transition:
-    to: str
-    condition: Optional[str] = None
-
-
-@dataclass
-class State:
-    name: str
-    type: str
-    transitions: List[Transition]
-    subtasks: List[str] = None
-    description: Optional[str] = None
+from core.entity.role import State, Transition
 
 
 class RoleTemplateParser:
