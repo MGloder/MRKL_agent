@@ -1,6 +1,7 @@
 import logging
 from core.entity.agent import Agent
 from core.entity.target import Target
+from core.entity.unified_context import UnifiedContext
 
 # Configure logging
 logging.basicConfig(
@@ -31,8 +32,15 @@ def main():
         )
 
         user = Target.from_template("./config/target_template/user.yaml")
+        user_query = "I want to find a restaurant in San Francisco"
         logger.info(f"User initialized successfully:")
         logger.info(f"Name: {user.name}")
+
+        unified_context = UnifiedContext.from_config(
+            agent=agent, target=user, interaction_his=[{"target": user_query}]
+        )
+        logger.info(f"Unified context initialized successfully:")
+        logger.info(f"{str(unified_context)}")
 
     except Exception as e:
         logger.error(f"Failed to initialize agent: {str(e)}", exc_info=True)
