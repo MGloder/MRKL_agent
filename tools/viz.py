@@ -1,5 +1,6 @@
 import graphviz
-from src.core.parser.role import RoleTemplateParser
+
+from core.entity.role import RoleTemplateParser
 
 
 def visualize_state_machine(
@@ -59,5 +60,5 @@ def visualize_state_machine(
 
 if __name__ == "__main__":
     # Example usage
-    file_path = "/config/role_template/restaurant_guide_role.yaml"
+    file_path = "./config/role_template/restaurant_guide_role.yaml"
     visualize_state_machine(file_path)
