@@ -1,0 +1,3 @@
+target:
+  name: demo_user
+  description: A user who want to find a restaurant that matches their preferences and requirements
