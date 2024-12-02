@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
 
+import yaml
+
 from src.core.entity.role import Role, State
-from src.core.parser.agent import AgentTemplateParser
 
 
 @dataclass
@@ -27,14 +28,16 @@ class Agent:
             Agent: Initialized agent with goal, role, and initial state from templates
         """
         # Parse agent template
-        agent_parser = AgentTemplateParser(agent_template_path)
-        agent_parser.parse()
-        agent_data = agent_parser.get_agent()
+        with open(agent_template_path, "r") as f:
+            template = yaml.safe_load(f)
 
-        # Parse role template
+        agent_data = template["agent"]
+
         role = Role.from_template(role_template_path)
 
-        return cls(goal=agent_data.goal, role=role, current_state=role.get_init_state())
+        return cls(
+            goal=agent_data["goal"], role=role, current_state=role.get_init_state()
+        )
 
     def get_goal(self) -> str:
         """Get the agent's goal.

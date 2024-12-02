@@ -1,5 +1,6 @@
 import logging
 from core.entity.agent import Agent
+from core.entity.target import Target
 
 # Configure logging
 logging.basicConfig(
@@ -28,6 +29,10 @@ def main():
         logger.info(
             f"Available next states: {[state.name for state in agent.get_role().get_next_states(agent.get_current_state().name)]}"
         )
+
+        user = Target.from_template("./config/target_template/user.yaml")
+        logger.info(f"User initialized successfully:")
+        logger.info(f"Name: {user.name}")
 
     except Exception as e:
         logger.error(f"Failed to initialize agent: {str(e)}", exc_info=True)
