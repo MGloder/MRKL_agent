@@ -1,0 +1,9 @@
+class IntentDetector:
+    def __init__(self):
+        ...
+
+    def _get_current_context(self, user_id: str, session_id: str):
+        ...
+
+    def predict(self, text):
+        ...
