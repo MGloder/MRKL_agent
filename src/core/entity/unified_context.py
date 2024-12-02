@@ -1,9 +1,7 @@
-import dataclasses
 from typing import List
 
 from core.entity.role import Role, State
 from core.entity.target import Target
-from core.parser.target import TargetTemplateParser
 
 
 class UnifiedContext:
