@@ -37,6 +37,17 @@ class Role:
     init_state: Optional[State] = None
     end_states: List[State] = None
 
+    def __init__(
+        self,
+        states: Dict[str, State],
+        init_state: Optional[State] = None,
+        end_states: List[State] = None,
+    ):
+        """Initialize the role with its states, initial state, and end states."""
+        self.states = states
+        self.init_state = init_state
+        self.end_states = end_states or []
+
     @classmethod
     def from_template(cls, template_path: str) -> "Role":
         """Create a Role instance from a template file.
