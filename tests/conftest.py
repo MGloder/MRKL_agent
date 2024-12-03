@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from src.core.entity.role import Role, State, Transition
+from core.entity.role import Role, State, Transition
 
 # Get the absolute path of the project root directory
 project_root = os.path.dirname(os.path.abspath(__file__))
