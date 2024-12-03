@@ -41,7 +41,7 @@ class UnifiedContext:
         """Get the target"""
         return self.target
 
-    def _get_interaction_his(self) -> List[str]:
+    def _get_interaction_his(self) -> List[Dict]:
         """Get the interaction history"""
         return self.interaction_his
 
