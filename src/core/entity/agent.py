@@ -32,6 +32,7 @@ class Agent:
         """Create an Agent instance from template files.
 
         Args:
+            cls: The class itself (automatically passed)
             agent_template_path: Path to the agent template YAML file
             role_template_path: Path to the role template YAML file
 
