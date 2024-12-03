@@ -3,6 +3,10 @@ from typing import Dict, List, Optional
 
 import yaml
 
+from utils.logging import logging
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Transition:
@@ -106,6 +110,7 @@ class Role:
 
 class RoleTemplateParser:
     def __init__(self, template_path: str):
+        logger.debug(f"init role from {template_path}")
         self.template_path = template_path
         self.states: Dict[str, State] = {}
         self.properties: Dict[str, Dict] = {}

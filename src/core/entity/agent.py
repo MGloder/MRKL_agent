@@ -4,6 +4,9 @@ from typing import Optional
 import yaml
 
 from src.core.entity.role import Role, State
+from utils.logging import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -15,6 +18,7 @@ class Agent:
     current_state: Optional[State] = None
 
     def __init__(self, goal, role, current_state):
+        logger.debug("Initializing agent...")
         self.goal = goal
         self.role = role
         self.current_state = current_state
@@ -111,3 +115,17 @@ class Agent:
             raise ValueError("Role does not have an initial state")
         if self.current_state.type != "start":
             raise ValueError("Role's initial state is not a start state")
+        # Get transitions from current state
+        transitions = self.current_state.transitions
+
+        # Filter transitions with no conditions and non-zero priority
+        available_transitions = [
+            t for t in transitions if not t.condition and t.priority > 0
+        ]
+
+        if available_transitions:
+            # Sort by priority and select smallest non-zero priority
+            next_transition = min(available_transitions, key=lambda x: x.priority)
+            next_state = self.role.get_state(next_transition.to)
+            if next_state:
+                self.current_state = next_state

@@ -3,15 +3,7 @@ from core.entity.agent import Agent
 from core.entity.target import Target
 from core.entity.unified_context import UnifiedContext
 from lib.modules.nlu.intent_detector import IntentDetector
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(),  # This will print to console as well
-    ],
-)
+from utils.logging import logging
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +19,7 @@ def main():
 
         logger.info(f"Agent initialized successfully:")
         logger.info(f"Goal: {agent.get_goal()}")
-        logger.info(f"Initial state: {agent.get_current_state().name}")
-        logger.info(
-            f"Available next states: {[state.name for state in agent.get_role().get_next_states(agent.get_current_state().name)]}"
-        )
+        logger.info(f"Current state: {agent.get_current_state().name}")
 
         user = Target.from_template("./config/target_template/user.yaml")
         user_query = "I want to find a restaurant in San Francisco"
