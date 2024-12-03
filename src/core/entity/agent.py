@@ -1,3 +1,4 @@
+"""Agent entity module."""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -18,7 +19,7 @@ class Agent:
     current_state: Optional[State] = None
 
     def __init__(self, goal, role, current_state):
-        logger.debug("Initializing agent...")
+        """Initialize the agent with its goal, role, and current state."""
         self.goal = goal
         self.role = role
         self.current_state = current_state
@@ -38,7 +39,7 @@ class Agent:
             Agent: Initialized agent with goal, role, and initial state from templates
         """
         # Parse agent template
-        with open(agent_template_path, "r") as f:
+        with open(agent_template_path, "r", encoding="utf-8") as f:
             template = yaml.safe_load(f)
 
         agent_data = template["agent"]

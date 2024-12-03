@@ -1,4 +1,4 @@
-import logging
+"""main function for testing the agent initialization and intent detection"""
 from core.entity.agent import Agent
 from core.entity.target import Target
 from core.entity.unified_context import UnifiedContext
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    """Main function for testing the agent initialization and intent detection"""
     logger.info("Starting agent initialization...")
 
     try:
@@ -17,29 +18,29 @@ def main():
             "./config/role_template/restaurant_guide_role.yaml",
         )
 
-        logger.info(f"Agent initialized successfully:")
-        logger.info(f"Goal: {agent.get_goal()}")
-        logger.info(f"Current state: {agent.get_current_state().name}")
+        logger.info("Agent initialized successfully:")
+        logger.info("Goal: {agent.get_goal()}")
+        logger.info("Current state: {agent.get_current_state().name}")
 
         user = Target.from_template("./config/target_template/user.yaml")
         user_query = "I want to find a restaurant in San Francisco"
-        logger.info(f"User initialized successfully:")
-        logger.info(f"Name: {user.name}")
+        logger.info("User initialized successfully: %s", user.name)
 
         unified_context = UnifiedContext.from_config(
             agent=agent, target=user, interaction_his=[]
         )
-        logger.info(f"Unified context initialized successfully:")
-        logger.info(f"{str(unified_context)}")
+        logger.info(
+            "Unified context initialized successfully: %s", str(unified_context)
+        )
 
         intent_detector = IntentDetector()
         result = intent_detector.detect_intent(
             unified_context=unified_context, raw_query=user_query
         )
-        logger.info(f"Detected intent: {result}")
+        logger.info("Detected intent: %s", result)
 
     except Exception as e:
-        logger.error(f"Failed to initialize agent: {str(e)}", exc_info=True)
+        logger.error("Failed to initialize agent: %s", str(e), exc_info=True)
         raise
 
 

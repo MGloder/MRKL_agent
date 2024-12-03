@@ -1,16 +1,19 @@
+"""Target entity class and parser for target templates"""
 from typing import Optional, List
 
 import yaml
 
 
 class TargetTemplateParser:
+    """Parser for target template files"""
+
     def __init__(self, template_path: str):
         self.template_path = template_path
         self.target: "Target" = None
 
     def parse(self) -> None:
         """Parse the YAML template file and populate the target"""
-        with open(self.template_path, "r") as f:
+        with open(self.template_path, "r", encoding="utf-8") as f:
             template = yaml.safe_load(f)
 
         target_data = template["target"]
@@ -25,15 +28,20 @@ class TargetTemplateParser:
 
 
 class Target:
-    def __init__(self, name: str, description: str, storage: List = []):
+    """Data class representing a target with its name, description, and storage"""
+
+    def __init__(self, name: str, description: str, storage: List = None):
+        """Initialize the target with its name, description, and storage"""
         self.name = name
         self.description = description
-        self.storage = storage
+        self.storage = storage if storage else []
 
     def add_storage(self, data):
+        """Add data to the storage"""
         self.storage.append(data)
 
     def get_storage(self) -> Optional[str]:
+        """Get the last item in the storage"""
         return self.storage[-1] if self.storage else None
 
     @classmethod

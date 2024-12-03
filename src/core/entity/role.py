@@ -1,3 +1,4 @@
+"""Role entity module."""
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
@@ -10,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Transition:
+    """Data class representing a transition from one state to another."""
+
     to: str
     condition: Optional[str] = None
     priority: int = 0
@@ -17,6 +20,8 @@ class Transition:
 
 @dataclass
 class State:
+    """Data class representing a state with its transitions and subtasks."""
+
     name: str
     type: str
     transitions: List[Transition]
@@ -109,15 +114,17 @@ class Role:
 
 
 class RoleTemplateParser:
+    """Parser for role template files."""
+
     def __init__(self, template_path: str):
-        logger.debug(f"init role from {template_path}")
+        """Initialize the parser with the path to the template file."""
         self.template_path = template_path
         self.states: Dict[str, State] = {}
         self.properties: Dict[str, Dict] = {}
 
     def parse(self) -> None:
         """Parse the YAML template file and populate the states and properties"""
-        with open(self.template_path, "r") as f:
+        with open(self.template_path, "r", encoding="utf-8") as f:
             template = yaml.safe_load(f)
 
         # Parse states
