@@ -3,7 +3,7 @@ from typing import Optional
 
 import yaml
 
-from src.core.entity.role import Role, State
+from core.entity.role import Role, State
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
