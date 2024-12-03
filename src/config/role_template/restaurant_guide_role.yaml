@@ -6,6 +6,7 @@ states:
     type: start
     transitions:
       - to: information_collection
+        priority: 1
 
   - name: information_collection
     type: action
@@ -17,29 +18,37 @@ states:
       - ask_customize_preferences
     transitions:
       - to: restaurant_recommendation
+        priority: 1
         condition: information_collected
       - to: error
         condition: collection_failed
+        priority: 0
 
   - name: restaurant_recommendation
     type: action
     transitions:
       - to: restaurant_detail_retrieval
         condition: details_requested
+        priority: 1
       - to: information_collection
         condition: request_to_update_filter_criteria
+        priority: 2
       - to: error
         condition: recommendation_failed
+        priority: 0
 
   - name: restaurant_detail_retrieval
     type: action
     transitions:
       - to: information_collection
         condition: request_to_update_filter_criteria
+        priority: 2
       - to: success
         condition: details_retrieved
+        priority: 1
       - to: error
         condition: retrieval_failed
+        priority: 0
 
   - name: success
     type: end

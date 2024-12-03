@@ -8,6 +8,7 @@ import yaml
 class Transition:
     to: str
     condition: Optional[str] = None
+    priority: int = 0
 
 
 @dataclass

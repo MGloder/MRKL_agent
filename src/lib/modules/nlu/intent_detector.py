@@ -10,6 +10,6 @@ class IntentDetector:
         """Get context for intent detector to infer the relevant information."""
         return get_context_by_session_id(session_id)
 
-    def detect_intent(self, session_id: str, raw_query: str) -> str:
+    def detect_intent(self, unified_context: UnifiedContext, raw_query: str) -> str:
         """Detect intent from the given message."""
         ...

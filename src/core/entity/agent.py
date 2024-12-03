@@ -14,6 +14,12 @@ class Agent:
     role: Role
     current_state: Optional[State] = None
 
+    def __init__(self, goal, role, current_state):
+        self.goal = goal
+        self.role = role
+        self.current_state = current_state
+        self._init_agent()
+
     @classmethod
     def from_template(
         cls, agent_template_path: str, role_template_path: str
@@ -97,3 +103,11 @@ class Agent:
             bool: True if the agent is in an end state, False otherwise
         """
         return self.current_state in self.role.get_end_states()
+
+    def _init_agent(self):
+        """Initialize the agent with the role's initial state."""
+        self.current_state = self.role.get_init_state()
+        if not self.current_state:
+            raise ValueError("Role does not have an initial state")
+        if self.current_state.type != "start":
+            raise ValueError("Role's initial state is not a start state")

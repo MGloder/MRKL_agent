@@ -2,6 +2,7 @@ import logging
 from core.entity.agent import Agent
 from core.entity.target import Target
 from core.entity.unified_context import UnifiedContext
+from lib.modules.nlu.intent_detector import IntentDetector
 
 # Configure logging
 logging.basicConfig(
@@ -37,10 +38,16 @@ def main():
         logger.info(f"Name: {user.name}")
 
         unified_context = UnifiedContext.from_config(
-            agent=agent, target=user, interaction_his=[{"target": user_query}]
+            agent=agent, target=user, interaction_his=[]
         )
         logger.info(f"Unified context initialized successfully:")
         logger.info(f"{str(unified_context)}")
+
+        intent_detector = IntentDetector()
+        result = intent_detector.detect_intent(
+            unified_context=unified_context, raw_query=user_query
+        )
+        logger.info(f"Detected intent: {result}")
 
     except Exception as e:
         logger.error(f"Failed to initialize agent: {str(e)}", exc_info=True)
