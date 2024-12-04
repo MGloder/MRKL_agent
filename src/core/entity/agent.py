@@ -115,7 +115,7 @@ class Agent:
         self.current_state = self.role.get_init_state()
         if not self.current_state:
             raise ValueError("Role does not have an initial state")
-        if self.current_state.type != "start":
+        if self.current_state.state_type != "start":
             raise ValueError("Role's initial state is not a start state")
         # Get transitions from current state
         transitions = self.current_state.transitions

@@ -1,6 +1,6 @@
 import graphviz
 
-from core.entity.role import RoleTemplateParser
+from core.entity.role import Role
 
 
 def visualize_state_machine(
@@ -14,23 +14,22 @@ def visualize_state_machine(
         output_path: Path where the visualization should be saved (without extension)
     """
     # Parse the template
-    parser = RoleTemplateParser(template_path)
-    parser.parse()
+    role = Role.from_template(template_path)
 
     # Create a new directed graph
     dot = graphviz.Digraph(comment="State Machine Visualization")
     dot.attr(rankdir="LR")  # Left to right layout
 
     # Add nodes (states)
-    for state_name, state in parser.get_all_states().items():
+    for state_name, state in role.states.items():
         # Set node attributes based on state type
         node_attrs = {
             "shape": "rectangle",
             "style": "filled",
             "fillcolor": "#90EE90"
-            if state.type == "start"
+            if state.state_type == "start"
             else "#FFB6C1"
-            if state.type == "end"
+            if state.state_type == "end"
             else "#ADD8E6",
             "width": "0.5",  # Set width of the node
             "height": "0.5",  # Set height of the node
@@ -41,14 +40,10 @@ def visualize_state_machine(
         if state.description:
             label += f"\n{state.description}"
 
-        # Add subtasks if available
-        if state.subtasks:
-            label += "\nSubtasks:\n" + "\n".join(f"- {task}" for task in state.subtasks)
-
         dot.node(state_name, label, **node_attrs)
 
     # Add edges (transitions)
-    for state_name, state in parser.get_all_states().items():
+    for state_name, state in role.states.items():
         for transition in state.transitions:
             edge_label = transition.condition if transition.condition else ""
             dot.edge(state_name, transition.to, edge_label)

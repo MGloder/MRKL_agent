@@ -1,4 +1,5 @@
-from core.entity.role import Role, State, Transition
+from core.entity.role import Role
+from core.entity.state import State, Transition, StateStatus
 
 
 def test_role_initialization(mock_role):
@@ -13,7 +14,7 @@ def test_get_init_state(mock_role):
     """Test getting initial state"""
     init_state = mock_role.get_init_state()
     assert init_state.name == "start"
-    assert init_state.type == "start"
+    assert init_state.state_type == "start"
 
 
 def test_get_end_states(mock_role):
@@ -27,7 +28,7 @@ def test_get_state(mock_role):
     """Test getting state by name"""
     state = mock_role.get_state("start")
     assert state.name == "start"
-    assert state.type == "start"
+    assert state.state_type == "start"
 
     # Test non-existent state
     assert mock_role.get_state("invalid") is None
@@ -51,10 +52,20 @@ def test_custom_role():
     # Create states
     state1 = State(
         name="state1",
-        type="normal",
+        state_type="normal",
+        description="",
         transitions=[Transition(to="state2", priority=1, condition="test")],
+        event_actions={},
+        status=StateStatus.NOT_STARTED,
     )
-    state2 = State(name="state2", type="end", transitions=[])
+    state2 = State(
+        name="state2",
+        state_type="end",
+        description="",
+        transitions=[],
+        event_actions={},
+        status=StateStatus.NOT_STARTED,
+    )
 
     # Create role
     role = Role(
@@ -68,3 +79,45 @@ def test_custom_role():
     assert role.end_states == [state2]
     assert role.get_state("state1") == state1
     assert role.get_state("state2") == state2
+
+
+def test_state_status_transitions():
+    # Test state status transitions
+    state1 = State(
+        name="state1",
+        state_type="normal",
+        description="First state",
+        transitions=[Transition(to="state2", priority=1, condition="completed")],
+        event_actions={},
+        status=StateStatus.NOT_STARTED,
+    )
+    state2 = State(
+        name="state2",
+        state_type="normal",
+        description="Second state",
+        transitions=[],
+        event_actions={},
+        status=StateStatus.NOT_STARTED,
+    )
+
+    role = Role(
+        states={"state1": state1, "state2": state2},
+        init_state=state1,
+        end_states=[state2],
+    )
+
+    # Check initial status
+    assert state1.status == StateStatus.NOT_STARTED
+
+    # Update to in progress
+    state1.update_status(StateStatus.IN_PROGRESS)
+    assert state1.status == StateStatus.IN_PROGRESS
+
+    # Update to completed
+    state1.update_status(StateStatus.COMPLETED)
+    assert state1.status == StateStatus.COMPLETED
+
+    # Verify state2 is accessible after state1 completion
+    next_states = role.get_next_states("state1")
+    assert len(next_states) == 1
+    assert next_states[0].name == "state2"

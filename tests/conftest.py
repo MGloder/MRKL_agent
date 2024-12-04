@@ -3,7 +3,8 @@ import sys
 
 import pytest
 
-from core.entity.role import Role, State, Transition
+from core.entity.role import Role
+from core.entity.state import State, Transition, Action
 
 # Get the absolute path of the project root directory
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -16,10 +17,18 @@ sys.path.append(project_root)
 def mock_role():
     start_state = State(
         name="start",
-        type="start",
+        state_type="start",
+        description="Initial starting state",
+        event_actions={"completed": [Action(name="complete_action")]},
         transitions=[Transition(to="next", priority=1, condition="completed")],
     )
-    next_state = State(name="next", type="normal", transitions=[])
+    next_state = State(
+        name="next",
+        state_type="normal",
+        description="Next state",
+        event_actions={},
+        transitions=[],
+    )
 
     role = Role(
         states={"start": start_state, "next": next_state},

@@ -4,29 +4,10 @@ from typing import Dict, List, Optional
 
 import yaml
 
+from core.entity.state import State, Transition, Action
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Transition:
-    """Data class representing a transition from one state to another."""
-
-    to: str
-    condition: Optional[str] = None
-    priority: int = 0
-
-
-@dataclass
-class State:
-    """Data class representing a state with its transitions and subtasks."""
-
-    name: str
-    type: str
-    transitions: List[Transition]
-    subtasks: List[str] = None
-    description: Optional[str] = None
 
 
 @dataclass
@@ -68,9 +49,9 @@ class Role:
         end_states = []
 
         for state in states.values():
-            if state.type == "start":
+            if state.state_type == "start":
                 init_state = state
-            elif state.type == "end":
+            elif state.state_type == "end":
                 end_states.append(state)
 
         return cls(states=states, init_state=init_state, end_states=end_states)
@@ -145,11 +126,17 @@ class RoleTemplateParser:
                 for transition in state_data.get("transitions", [])
             ]
 
+            event_actions = {}
+            if "event_actions" in state_data:
+                for event, actions in state_data["event_actions"].items():
+                    event_actions[event] = [Action(**action) for action in actions]
+
             state = State(
                 name=state_data["name"],
-                type=state_data["type"],
+                state_type=state_data["state_type"],
+                description="",
                 transitions=transitions,
-                subtasks=state_data.get("subtasks"),
+                event_actions=event_actions,
             )
 
             self.states[state.name] = state

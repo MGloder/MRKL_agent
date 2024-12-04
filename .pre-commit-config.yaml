@@ -21,6 +21,6 @@ repos:
             "-rn", # Only display messages
             "-sn", # Don't display the score
             "--rcfile=.pylintrc", # Link to your config file
-            "--disable=C0330,C0326,R0022",
+            "--disable=C0330,C0326,R0022,R0913,R0917",
           ]
         files: ^src/

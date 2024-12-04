@@ -3,19 +3,20 @@
 # Define the states of the state machine
 states:
   - name: initial
-    type: start
+    state_type: start
     transitions:
       - to: information_collection
         priority: 1
 
   - name: information_collection
-    type: action
-    subtasks:
-      - ask_geo_location
-      - ask_credit_card_type_issuer
-      - ask_price_range
-      - ask_rating_range
-      - ask_customize_preferences
+    state_type: action
+    event_actions:
+      collect_info:
+        - name: ask_geo_location
+        - name: ask_credit_card_type_issuer
+        - name: ask_price_range
+        - name: ask_rating_range
+        - name: ask_customize_preferences
     transitions:
       - to: restaurant_recommendation
         priority: 1
@@ -25,7 +26,7 @@ states:
         priority: 0
 
   - name: restaurant_recommendation
-    type: action
+    state_type: action
     transitions:
       - to: restaurant_detail_retrieval
         condition: details_requested
@@ -38,7 +39,7 @@ states:
         priority: 0
 
   - name: restaurant_detail_retrieval
-    type: action
+    state_type: action
     transitions:
       - to: information_collection
         condition: request_to_update_filter_criteria
@@ -51,10 +52,10 @@ states:
         priority: 0
 
   - name: success
-    type: end
+    state_type: end
 
   - name: error
-    type: end
+    state_type: end
 
 # Define properties for each state
 properties:

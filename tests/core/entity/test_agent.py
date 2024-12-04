@@ -3,8 +3,9 @@ from unittest.mock import mock_open, patch
 import pytest
 import yaml
 
+from core.entity.state import State, StateStatus
 from src.core.entity.agent import Agent
-from src.core.entity.role import Role, State
+from src.core.entity.role import Role
 
 
 def test_agent_initialization(mock_role):
@@ -24,8 +25,11 @@ def test_agent_from_template():
             "states": [
                 {
                     "name": "start",
-                    "type": "start",
+                    "state_type": "start",
+                    "description": "start",
                     "transitions": [{"to": "next", "priority": 1}],
+                    "event_actions": {"completed": [{"name": "complete_action"}]},
+                    "status": "NOT_STARTED",
                 }
             ]
         }
@@ -43,8 +47,24 @@ def test_agent_from_template():
             "src.core.entity.role.Role.from_template"
         ) as mock_role_from_template:
             mock_role = Role(
-                states={"start": State(name="start", type="start", transitions=[])},
-                init_state=State(name="start", type="start", transitions=[]),
+                states={
+                    "start": State(
+                        name="start",
+                        state_type="start",
+                        description="example",
+                        transitions=[],
+                        event_actions={},
+                        status=StateStatus.NOT_STARTED,
+                    )
+                },
+                init_state=State(
+                    name="start",
+                    state_type="start",
+                    description="example",
+                    transitions=[],
+                    event_actions={},
+                    status=StateStatus.NOT_STARTED,
+                ),
                 end_states=[],
             )
             mock_role_from_template.return_value = mock_role
@@ -83,7 +103,14 @@ def test_set_state(mock_role):
     agent = Agent(
         goal="test goal", role=mock_role, current_state=mock_role.get_init_state()
     )
-    new_state = State(name="new", type="normal", transitions=[])
+    new_state = State(
+        name="new",
+        state_type="normal",
+        description="",
+        transitions=[],
+        event_actions={},
+        status=StateStatus.NOT_STARTED,
+    )
 
     agent.set_state(new_state)
     assert agent.get_current_state() == new_state
@@ -93,10 +120,22 @@ def test_init_agent_invalid_state():
     invalid_role = Role(
         states={
             "invalid": State(
-                name="invalid", type="normal", transitions=[]
+                name="invalid",
+                state_type="normal",
+                description="",
+                transitions=[],
+                event_actions={},
+                status=StateStatus.IN_PROGRESS,
             )  # Not a start state
         },
-        init_state=State(name="invalid", type="normal", transitions=[]),
+        init_state=State(
+            name="invalid",
+            state_type="normal",
+            description="",
+            transitions=[],
+            event_actions={},
+            status=StateStatus.NOT_STARTED,
+        ),
         end_states=[],
     )
 
