@@ -1,4 +1,5 @@
 """LLM module for ad-hoc inference."""
+import os
 from typing import List, Dict
 
 from openai import OpenAI
@@ -30,3 +31,6 @@ class AdHocInference:
         completions = self.client.chat.completions.create(model=model, messages=context)
         result = completions.choices[0].message.content
         return result
+
+
+llm_service = AdHocInference(os.environ["OPENAI_API_KEY"], {})

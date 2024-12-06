@@ -1,0 +1,30 @@
+prompt: |
+  Agent Name: {agent_name}
+  Agent Description: {agent_description}
+  Agent Goal: {agent_goal}
+  Agent Current state: {current_state}
+  Request from target: {raw_query}
+  Event list options:
+    {event_list}
+
+  Task: return one or more events from the event list above; name only
+
+parameters:
+  agent_name:
+    description: Name of the agent
+    type: str
+  agent_description:
+    description: Description of the agent
+    type: str
+  agent_goal:
+    description: Goal of the agent
+    type: str
+  current_state:
+    description: Current state of the agent
+    type: str
+  raw_query:
+    description: Raw query from the target
+    type: str
+  event_list:
+    description: List of possible events
+    type: str

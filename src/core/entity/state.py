@@ -81,3 +81,23 @@ class State:
             new_status: The new status to set
         """
         self.status = new_status
+
+    def get_formatted_event_list(self) -> str:
+        """Get a formatted list of event:actions from event_actions.
+
+        Returns:
+            A formatted string of actions associated with the event
+        """
+        result = ""
+        for index, (event, actions) in enumerate(self.event_actions.items()):
+            result = (
+                result
+                + f"{index + 1}. Event: {event}: Actions: {', '.join(action.name for action in actions)}"
+            )
+            if index != len(self.event_actions.items()) - 1:
+                result = result + "\n"
+        return result
+
+    def get_formatted_current_state(self):
+        """Get the formatted current state"""
+        return f"State Name: {self.name}, Description: {self.description}"

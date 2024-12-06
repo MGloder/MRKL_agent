@@ -1,4 +1,8 @@
 """main function for testing the agent initialization and intent detection"""
+import time
+
+import dotenv
+
 from core.entity.agent import Agent
 from core.entity.target import Target
 from core.entity.unified_context import UnifiedContext
@@ -10,12 +14,19 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Main function for testing the agent initialization and intent detection"""
+    dotenv.load_dotenv("../.env")
+
     logger.info("Starting agent initialization...")
 
     try:
+        start_time = time.perf_counter()
         agent = Agent.from_template(
             "./config/agent_template/restaurant_guide_agent.yaml",
             "./config/role_template/restaurant_guide_role.yaml",
+        )
+        end_time = time.perf_counter()
+        logger.info(
+            "Time taken for agent initialization: %.4f seconds", end_time - start_time
         )
 
         logger.info("Agent initialized successfully:")
@@ -32,10 +43,14 @@ def main():
         logger.info(
             "Unified context initialized successfully: %s", str(unified_context)
         )
-
         intent_detector = IntentDetector()
+        start_time = time.perf_counter()
         result = intent_detector.detect_intent(
             unified_context=unified_context, raw_query=user_query
+        )
+        end_time = time.perf_counter()
+        logger.info(
+            "Time taken for intent detection: %.4f seconds", end_time - start_time
         )
         logger.info("Detected intent: %s", result)
 
