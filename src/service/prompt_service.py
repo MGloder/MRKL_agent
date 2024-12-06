@@ -12,7 +12,15 @@ import yaml
 class PromptService:
     """Service class to manage and format prompts."""
 
-    def __init__(self, prompt_template_dir: str = "./config/prompts"):
+    _instance: Optional["PromptService"] = None
+
+    def __new__(cls, *args, **kwargs) -> "PromptService":
+        """Implement singleton pattern."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, prompt_template_dir: str = "./src/config/prompts"):
         """Initialize the prompt service.
 
         Args:
@@ -82,6 +90,20 @@ class PromptService:
             raise KeyError(f"Prompt template not found: {template_name}")
 
         return self.prompt_templates[template_name].get("parameters")
+
+    def remove_template(self, template_name: str) -> None:
+        """Remove a prompt template.
+
+        Args:
+            template_name: Name of the template to remove
+
+        Raises:
+            KeyError: If template_name doesn't exist
+        """
+        if template_name not in self.prompt_templates:
+            raise KeyError(f"Prompt template not found: {template_name}")
+
+        del self.prompt_templates[template_name]
 
     def build_prompt_from_template(self, template_name: str, **kwargs) -> str:
         """Build prompt using the specified template with unified context.

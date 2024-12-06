@@ -33,4 +33,4 @@ class AdHocInference:
         return result
 
 
-llm_service = AdHocInference(os.environ["OPENAI_API_KEY"], {})
+llm_service = AdHocInference(os.environ.get("OPENAI_API_KEY", ""), {})

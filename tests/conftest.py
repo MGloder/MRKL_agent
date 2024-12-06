@@ -41,3 +41,11 @@ def mock_role():
 @pytest.fixture
 def mock_agent_template():
     return {"agent": {"goal": "test goal"}}
+
+
+@pytest.fixture
+def mock_template():
+    """Mock template fixture."""
+    return """Agent Name: {agent_name}
+Agent Description: {agent_description}
+Task: {task}"""
