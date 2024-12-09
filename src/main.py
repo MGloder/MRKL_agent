@@ -1,5 +1,5 @@
 """main function for testing the agent initialization and intent detection"""
-from app_initializer import ApplicationInitializer
+from application import ApplicationInitializer
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
@@ -19,12 +19,11 @@ def main():
         role_template_path=role_template_path,
         target_template_path=target_template_path,
     )
+
     try:
         user_query = "I want to find a restaurant in San Francisco"
-        result = application.intent_detect_service.intent_detection(
-            unified_context=application.user_engagement_service.get_context(
-                engagement_id
-            ),
+        result = application.interact(
+            engagement_id=engagement_id,
             raw_query=user_query,
         )
         logger.info("Detected intent: %s", result)

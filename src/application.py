@@ -15,10 +15,24 @@ from src.service.prompt_service import PromptService
 class Application:
     """Represents the application with its initialized services."""
 
-    llm_service: AdHocInference
-    prompt_service: PromptService
-    intent_detect_service: IntentDetectService
-    user_engagement_service: UserEngagementService
+    _llm_service: AdHocInference
+    _prompt_service: PromptService
+    _intent_detect_service: IntentDetectService
+    _user_engagement_service: UserEngagementService
+
+    def _intent_detection(self, engagement_id: str, raw_query: str) -> str:
+        """Detect intent from the given message."""
+        context = self._user_engagement_service.get_context(engagement_id)
+        return self._intent_detect_service.intent_detection(context, raw_query)
+
+    @property
+    def user_engagement_service(self):
+        """Get the user engagement service."""
+        return self._user_engagement_service
+
+    def interact(self, engagement_id: str, raw_query: str) -> str:
+        """Interact with the agent for the given engagement."""
+        return self._intent_detection(engagement_id, raw_query)
 
 
 @dataclass
@@ -54,8 +68,8 @@ class ApplicationInitializer:
         user_engagement = UserEngagementService()
 
         return Application(
-            llm_service=llm,
-            prompt_service=prompts,
-            intent_detect_service=intent_detect,
-            user_engagement_service=user_engagement,
+            _llm_service=llm,
+            _prompt_service=prompts,
+            _intent_detect_service=intent_detect,
+            _user_engagement_service=user_engagement,
         )
