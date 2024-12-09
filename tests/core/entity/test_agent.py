@@ -10,7 +10,11 @@ from src.core.entity.role import Role
 
 def test_agent_initialization(mock_role):
     agent = Agent(
-        goal="test goal", role=mock_role, current_state=mock_role.get_init_state()
+        goal="test goal",
+        agent_name="test agent",
+        description="test description",
+        role=mock_role,
+        current_state=mock_role.get_init_state(),
     )
     assert agent.get_goal() == "test goal"
     assert agent.get_role() == mock_role
@@ -18,7 +22,15 @@ def test_agent_initialization(mock_role):
 
 
 def test_agent_from_template():
-    mock_agent_yaml = yaml.dump({"agent": {"goal": "test goal"}})
+    mock_agent_yaml = yaml.dump(
+        {
+            "agent": {
+                "goal": "test goal",
+                "name": "test agent",
+                "description": "test description",
+            }
+        }
+    )
 
     mock_role_yaml = yaml.dump(
         {
@@ -72,11 +84,17 @@ def test_agent_from_template():
             agent = Agent.from_template("fake_agent.yaml", "fake_role.yaml")
 
             assert agent.get_goal() == "test goal"
+            assert agent.name == "test agent"
+            assert agent.description == "test description"
 
 
 def test_transition_to(mock_role):
     agent = Agent(
-        goal="test goal", role=mock_role, current_state=mock_role.get_init_state()
+        goal="test goal",
+        agent_name="test",
+        description="",
+        role=mock_role,
+        current_state=mock_role.get_init_state(),
     )
 
     # Test successful transition
@@ -92,7 +110,11 @@ def test_transition_to(mock_role):
 
 def test_is_in_end_state(mock_role):
     agent = Agent(
-        goal="test goal", role=mock_role, current_state=mock_role.get_init_state()
+        goal="test goal",
+        agent_name="test",
+        description="",
+        role=mock_role,
+        current_state=mock_role.get_init_state(),
     )
 
     # Should transition to "next" state during initialization
@@ -101,7 +123,11 @@ def test_is_in_end_state(mock_role):
 
 def test_set_state(mock_role):
     agent = Agent(
-        goal="test goal", role=mock_role, current_state=mock_role.get_init_state()
+        goal="test goal",
+        agent_name="test",
+        description="",
+        role=mock_role,
+        current_state=mock_role.get_init_state(),
     )
     new_state = State(
         name="new",
@@ -142,6 +168,8 @@ def test_init_agent_invalid_state():
     with pytest.raises(ValueError, match="Role's initial state is not a start state"):
         Agent(
             goal="test goal",
+            agent_name="test",
+            description="",
             role=invalid_role,
             current_state=invalid_role.get_init_state(),
         )

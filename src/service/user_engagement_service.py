@@ -89,3 +89,16 @@ class UserEngagementService:
         """
         if engagement_id in self._engagements:
             del self._engagements[engagement_id]
+
+    def get_agent_with_engagement_id(self, engagement_id) -> Optional[Agent]:
+        """Get the agent associated with an engagement ID.
+
+        Args:
+            engagement_id: Unique engagement ID
+
+        Returns:
+            Agent: The agent associated with the engagement ID
+        """
+        if context := self._engagements.get(engagement_id):
+            return context.agent
+        return None

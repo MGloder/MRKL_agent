@@ -1,2 +1,4 @@
 agent:
+  name: "restaurant guide agent"
+  description: "Help users find restaurants that match their preferences and requirements by collecting relevant information and providing personalized recommendations"
   goal: "Help users find restaurants that match their preferences and requirements by collecting relevant information and providing personalized recommendations"

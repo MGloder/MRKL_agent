@@ -5,6 +5,7 @@ from typing import Optional
 import yaml
 
 from core.entity.role import Role, State
+from service import service_center
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
@@ -14,13 +15,19 @@ logger = logging.getLogger(__name__)
 class Agent:
     """Data class representing an agent with its role, goal, and current state."""
 
+    name: str
+    description: str
     goal: str
     role: Role
     current_state: Optional[State] = None
     engagement_id: Optional[str] = None
 
-    def __init__(self, goal, role, current_state, engagement_id=None):
+    def __init__(
+        self, goal, agent_name, description, role, current_state, engagement_id=None
+    ):
         """Initialize the agent with its goal, role, and current state."""
+        self.name = agent_name
+        self.description = description
         self.goal = goal
         self.role = role
         self.current_state = current_state
@@ -50,7 +57,11 @@ class Agent:
         role = Role.from_template(role_template_path)
 
         return cls(
-            goal=agent_data["goal"], role=role, current_state=role.get_init_state()
+            goal=agent_data["goal"],
+            agent_name=agent_data["name"],
+            description=agent_data["description"],
+            role=role,
+            current_state=role.get_init_state(),
         )
 
     def get_goal(self) -> str:
@@ -133,3 +144,19 @@ class Agent:
             next_state = self.role.get_state(next_transition.to)
             if next_state:
                 self.current_state = next_state
+
+    def interact(self, user_query):
+        """
+
+        :param user_query:
+        :return:
+        """
+        args = {
+            "agent_name": self.name,
+            "agent_description": self.description,
+            "agent_goal": self.goal,
+            "current_state": self.current_state.get_formatted_current_state(),
+            "raw_query": user_query,
+            "event_list": self.get_current_state().get_formatted_event_list(),
+        }
+        return service_center.intent_detection_service.detect_intent_with_args(**args)

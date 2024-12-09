@@ -43,7 +43,7 @@ class UnifiedContext:
 
     def _get_current_state(self) -> State:
         """Get the current state of the role"""
-        return self.agent.current_state
+        return self.agent.get_current_state()
 
     def _get_role(self) -> Agent:
         """Get the role"""
