@@ -4,6 +4,7 @@ from typing import Optional
 
 import yaml
 
+from core.entity.response import AgentResponse
 from core.entity.role import Role, State
 from service import service_center
 from utils.logging import logging
@@ -145,18 +146,58 @@ class Agent:
             if next_state:
                 self.current_state = next_state
 
-    def interact(self, user_query):
+    def interact(self, user_query: str) -> AgentResponse:
         """
+        Interact with the user involve 5 steps:
+        1. Get the event from the raw query with intent detection
+        2. Find action with event from the event-action registry
+        3. Execute actions
+        4. Update the current state
+        5. Return the response
 
         :param user_query:
-        :return:
+        :return: AgentResponse
         """
-        args = {
-            "agent_name": self.name,
-            "agent_description": self.description,
-            "agent_goal": self.goal,
-            "current_state": self.current_state.get_formatted_current_state(),
-            "raw_query": user_query,
-            "event_list": self.get_current_state().get_formatted_event_list(),
-        }
-        return service_center.intent_detection_service.detect_intent_with_args(**args)
+        try:
+            # Step 1: Get the event from the raw query with intent detection
+            args = {
+                "agent_name": self.name,
+                "agent_description": self.description,
+                "agent_goal": self.goal,
+                "current_state": self.current_state.get_formatted_current_state(),
+                "raw_query": user_query,
+                "event_list": self.get_current_state().get_formatted_event_list(),
+            }
+            event = service_center.intent_detection_service.detect_intent_with_args(
+                **args
+            )
+
+            # Step 2: Find action with event from the event-action registry
+            actions = service_center.event_action_registry.get_actions_from_scope(
+                scope=event
+            )
+            if not actions:
+                return AgentResponse(
+                    message=f"No actions found for event: {event.action_name}",
+                    success=False,
+                    error=f"No actions found for event: {event.action_name}",
+                )
+
+            # Step 3: Execute actions
+            responses = []
+            for _, action in actions.items():
+                response = action()
+                responses.append(response)
+
+            # Step 4: Update the current state
+
+            # Step 5: Return the response as an AgentResponse
+            return AgentResponse(message="; ".join(responses), success=True)
+
+        except Exception as e:  # pylint:disable=broad-exception-caught
+            logger.error("Error during interaction: %s", str(e))
+            return AgentResponse(
+                message="An error occurred during interaction.",
+                success=False,
+                error=str(e),
+            )

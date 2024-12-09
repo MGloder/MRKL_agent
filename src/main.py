@@ -22,7 +22,7 @@ def main():
         user_query = "I want to find a restaurant in San Francisco"
         agent = user_engagement_service.get_agent_with_engagement_id(engagement_id)
         result = agent.interact(user_query)
-        logger.info("Detected intent: %s", result)
+        logger.info("Interaction result: %s", str(result))
 
     except Exception as e:
         logger.error("Failed to initialize agent: %s", str(e), exc_info=True)

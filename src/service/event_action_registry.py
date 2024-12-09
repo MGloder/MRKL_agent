@@ -57,6 +57,18 @@ class EventActionRegistry:
             return actions.get(action_name)
         return None
 
+    def get_actions_from_scope(self, scope: str) -> dict:
+        """Get all actions registered under the given scope.
+
+        Args:
+            scope: The scope to retrieve actions for
+
+        Returns:
+            A dictionary of action_name to function mappings for the scope,
+            or an empty dict if the scope doesn't exist
+        """
+        return self._registry.get(scope, {})
+
     def unregister(self, scope: str, action_name: str) -> None:
         """Remove an action from the registry.
 

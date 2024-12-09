@@ -25,6 +25,11 @@ class ServiceCenter:
         """Detect intent from the given message."""
         return self._intent_detect_service
 
+    @property
+    def event_action_registry(self):
+        """Get the event action registry."""
+        return self._event_action_registry
+
 
 @dataclass
 class ServiceCenterInitializer:
