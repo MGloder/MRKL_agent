@@ -5,8 +5,8 @@ from typing import Optional
 
 import dotenv
 
-from lib.modules.nlu.intent_detector import IntentDetectService
-from src.service.llm import AdHocInference
+from service.intent_detect_service import IntentDetectService
+from src.service.llm_service import AdHocInference
 from src.service.prompt_service import PromptService
 
 
