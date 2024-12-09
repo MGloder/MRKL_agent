@@ -11,7 +11,7 @@ from src.service.prompt_service import PromptService
 
 
 @dataclass
-class AppConfig:
+class ApplicationInitializer:
     """Application configuration and service initialization."""
 
     llm_service: AdHocInference
@@ -19,7 +19,9 @@ class AppConfig:
     intent_detect_service: IntentDetectService
 
     @classmethod
-    def initialize(cls, openai_api_key: Optional[str] = None) -> "AppConfig":
+    def initialize(
+        cls, openai_api_key: Optional[str] = None
+    ) -> "ApplicationInitializer":
         """Initialize application services with configuration.
 
         Args:
@@ -46,4 +48,4 @@ class AppConfig:
 
 
 # Create default app configuration
-app_config = AppConfig.initialize()
+application = ApplicationInitializer.initialize()
