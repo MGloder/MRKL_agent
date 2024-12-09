@@ -128,6 +128,3 @@ class PromptService:
         template_params = {**context_params, **kwargs}
 
         return self.get_prompt(template_name, **template_params)
-
-
-prompt_service = PromptService()

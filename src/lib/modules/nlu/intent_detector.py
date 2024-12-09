@@ -5,17 +5,18 @@ by analyzing the raw query text and contextual information.
 """
 
 from core.entity.unified_context import UnifiedContext
-from service import prompt_service, llm_service
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
 
 
-class IntentDetector:
+class IntentDetectService:
     """Intent detector class to detect intents from raw queries."""
 
-    def __init__(self):
+    def __init__(self, llm_service, prompt_service):
         """Initialize the intent detector module."""
+        self.llm_service = llm_service
+        self.prompt_service = prompt_service
 
     def detect_intent_without(self, unified_context: UnifiedContext) -> str:
         """Detect intent without a raw query"""
@@ -45,7 +46,9 @@ class IntentDetector:
             "event_list": unified_context.agent.get_current_state().get_formatted_event_list(),
         }
 
-        prompt = prompt_service.build_prompt_from_template("intent_detection", **kwargs)
+        prompt = self.prompt_service.build_prompt_from_template(
+            "intent_detection", **kwargs
+        )
 
-        result = llm_service.completions(prompt=prompt)
+        result = self.llm_service.completions(prompt=prompt)
         return result

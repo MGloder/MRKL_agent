@@ -1,7 +1,9 @@
 import pytest
 from unittest.mock import patch, mock_open
+from service.prompt_service import PromptService
 
-from service.prompt_service import PromptService, prompt_service
+# Initialize the PromptService instance
+prompt_service = PromptService()
 
 
 def test_prompt_service_singleton():
