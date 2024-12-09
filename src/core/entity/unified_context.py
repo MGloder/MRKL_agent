@@ -1,5 +1,5 @@
 """UnifiedContext class for managing the context in natural language understanding."""
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from core.entity.agent import Agent
 from core.entity.role import State
@@ -15,19 +15,31 @@ class UnifiedContext:
     agent: Agent
     target: Target
     interaction_his: List[Dict]
+    engagement_id: Optional[str]
 
-    def __init__(self, agent: Agent, target: Target, interaction_his: List[Dict]):
-        """Initialize UnifiedContext with agent, target, and interaction history."""
+    def __init__(
+        self,
+        agent: Agent,
+        target: Target,
+        interaction_his: List[Dict],
+        engagement_id: Optional[str] = None,
+    ):
+        """Initialize UnifiedContext with agent, target, interaction history, and engagement ID."""
         self.agent = agent
         self.target = target
         self.interaction_his = interaction_his
+        self.engagement_id = engagement_id
 
     @classmethod
     def from_config(
-        cls, agent: Agent, target: Target, interaction_his: List[Dict]
+        cls,
+        agent: Agent,
+        target: Target,
+        interaction_his: List[Dict],
+        engagement_id: Optional[str] = None,
     ) -> "UnifiedContext":
-        """Create a UnifiedContext instance from configuration."""
-        return cls(agent, target, interaction_his)
+        """Create a UnifiedContext instance from configuration with an engagement ID."""
+        return cls(agent, target, interaction_his, engagement_id)
 
     def _get_current_state(self) -> State:
         """Get the current state of the role"""

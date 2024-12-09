@@ -6,8 +6,19 @@ from typing import Optional
 import dotenv
 
 from service.intent_detect_service import IntentDetectService
+from service.user_engagement_service import UserEngagementService
 from src.service.llm_service import AdHocInference
 from src.service.prompt_service import PromptService
+
+
+@dataclass
+class Application:
+    """Represents the application with its initialized services."""
+
+    llm_service: AdHocInference
+    prompt_service: PromptService
+    intent_detect_service: IntentDetectService
+    user_engagement_service: UserEngagementService
 
 
 @dataclass
@@ -17,11 +28,10 @@ class ApplicationInitializer:
     llm_service: AdHocInference
     prompt_service: PromptService
     intent_detect_service: IntentDetectService
+    user_engagement_service: UserEngagementService
 
     @classmethod
-    def initialize(
-        cls, openai_api_key: Optional[str] = None
-    ) -> "ApplicationInitializer":
+    def initialize(cls, openai_api_key: Optional[str] = None) -> Application:
         """Initialize application services with configuration.
 
         Args:
@@ -41,11 +51,11 @@ class ApplicationInitializer:
         prompts = PromptService()
 
         intent_detect = IntentDetectService(llm_service=llm, prompt_service=prompts)
+        user_engagement = UserEngagementService()
 
-        return cls(
-            llm_service=llm, prompt_service=prompts, intent_detect_service=intent_detect
+        return Application(
+            llm_service=llm,
+            prompt_service=prompts,
+            intent_detect_service=intent_detect,
+            user_engagement_service=user_engagement,
         )
-
-
-# Create default app configuration
-application = ApplicationInitializer.initialize()

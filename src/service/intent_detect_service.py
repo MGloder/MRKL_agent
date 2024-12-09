@@ -22,7 +22,7 @@ class IntentDetectService:
         """Detect intent without a raw query"""
         print(unified_context)
 
-    def detect_intent(self, unified_context: UnifiedContext, raw_query: str) -> str:
+    def intent_detection(self, unified_context: UnifiedContext, raw_query: str) -> str:
         """Detect intent from the given message.
         Prompt template:
           Agent Name: {agent_name}

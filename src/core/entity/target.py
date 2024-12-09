@@ -30,11 +30,18 @@ class TargetTemplateParser:
 class Target:
     """Data class representing a target with its name, description, and storage"""
 
-    def __init__(self, name: str, description: str, storage: List = None):
-        """Initialize the target with its name, description, and storage"""
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        storage: List = None,
+        engagement_id: Optional[str] = None,
+    ):
+        """Initialize the target with its name, description, storage, and engagement ID"""
         self.name = name
         self.description = description
         self.storage = storage if storage else []
+        self.engagement_id = engagement_id
 
     def add_storage(self, data):
         """Add data to the storage"""
@@ -45,16 +52,10 @@ class Target:
         return self.storage[-1] if self.storage else None
 
     @classmethod
-    def from_template(cls, target_template_path: str) -> "Target":
-        """Create an Agent instance from template files.
-
-        Args:
-            target_template_path: Path to the target template YAML file
-
-        Returns:
-            Target: Initialized agent with goal, role, and initial state from templates
-        """
-        # Parse agent template
+    def from_template(
+        cls, target_template_path: str, engagement_id: Optional[str] = None
+    ) -> "Target":
+        """Create a Target instance from template files with an engagement ID."""
         target_parser = TargetTemplateParser(target_template_path)
         target_parser.parse()
         target_data = target_parser.get_target()
@@ -63,4 +64,5 @@ class Target:
             name=target_data.name,
             description=target_data.description,
             storage=target_data.storage,
+            engagement_id=engagement_id,
         )

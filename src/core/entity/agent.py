@@ -17,12 +17,14 @@ class Agent:
     goal: str
     role: Role
     current_state: Optional[State] = None
+    engagement_id: Optional[str] = None
 
-    def __init__(self, goal, role, current_state):
+    def __init__(self, goal, role, current_state, engagement_id=None):
         """Initialize the agent with its goal, role, and current state."""
         self.goal = goal
         self.role = role
         self.current_state = current_state
+        self.engagement_id = engagement_id
         self._init_agent()
 
     @classmethod
