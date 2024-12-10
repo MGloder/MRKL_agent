@@ -14,17 +14,20 @@ logger = logging.getLogger(__name__)
 class Role:
     """Data class representing a role with its state machine."""
 
+    name: str
     states: Dict[str, State]
     init_state: Optional[State] = None
     end_states: List[State] = None
 
     def __init__(
         self,
+        name: str,
         states: Dict[str, State],
         init_state: Optional[State] = None,
         end_states: List[State] = None,
     ):
-        """Initialize the role with its states, initial state, and end states."""
+        """Initialize the role with its name, states, initial state, and end states."""
+        self.name = name
         self.states = states
         self.init_state = init_state
         self.end_states = end_states or []
@@ -42,6 +45,7 @@ class Role:
         parser = RoleTemplateParser(template_path)
         parser.parse()
 
+        role_name = parser.get_role_name()
         states = parser.get_all_states()
 
         # Find init and end states
@@ -54,7 +58,9 @@ class Role:
             elif state.state_type == "end":
                 end_states.append(state)
 
-        return cls(states=states, init_state=init_state, end_states=end_states)
+        return cls(
+            name=role_name, states=states, init_state=init_state, end_states=end_states
+        )
 
     def get_init_state(self) -> Optional[State]:
         """Get the initial state of the role.
@@ -104,6 +110,23 @@ class Role:
 
         return next_states
 
+    def get_event_description(self, state_name: str, event_name: str) -> Optional[str]:
+        """Get the description of a specific event in a given state.
+
+        Args:
+            state_name: Name of the state
+            event_name: Name of the event
+
+        Returns:
+            Optional[str]: The description of the event if it exists
+        """
+        state = self.get_state(state_name)
+        if not state:
+            return None
+
+        event = state.event_actions.get(event_name)
+        return event.description if event else None
+
 
 class RoleTemplateParser:
     """Parser for role template files."""
@@ -113,16 +136,18 @@ class RoleTemplateParser:
         self.template_path = template_path
         self.states: Dict[str, State] = {}
         self.properties: Dict[str, Dict] = {}
+        self.template = None
 
     def parse(self) -> None:
         """Parse the YAML template file and populate the states and properties"""
         with open(self.template_path, "r", encoding="utf-8") as f:
-            template = yaml.safe_load(f)
+            self.template = yaml.safe_load(f)
+
         # Parse properties
-        self.properties = template.get("properties", {})
+        self.properties = self.template.get("properties", {})
 
         # Parse states
-        for state_data in template["states"]:
+        for state_data in self.template["states"]:
             transitions = [
                 Transition(**transition)
                 for transition in state_data.get("transitions", [])
@@ -165,3 +190,8 @@ class RoleTemplateParser:
     def get_properties(self) -> Dict[str, Dict]:
         """Get all properties"""
         return self.properties
+
+    def get_role_name(self) -> str:
+        """Get the role name from the template."""
+        role_info = self.template.get("role", {})
+        return role_info.get("name", "Unnamed Role")

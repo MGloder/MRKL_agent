@@ -69,6 +69,7 @@ def test_custom_role():
 
     # Create role
     role = Role(
+        name="test role",
         states={"state1": state1, "state2": state2},
         init_state=state1,
         end_states=[state2],
@@ -101,6 +102,7 @@ def test_state_status_transitions():
     )
 
     role = Role(
+        name="test role",
         states={"state1": state1, "state2": state2},
         init_state=state1,
         end_states=[state2],

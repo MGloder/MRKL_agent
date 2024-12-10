@@ -19,7 +19,7 @@ def main():
     )
 
     try:
-        user_query = "I want to find a good restaurant in the city"
+        user_query = "Something random"
         restaurant_guide_agent = user_engagement_service.get_agent_with_engagement_id(
             engagement_id
         )

@@ -1,5 +1,6 @@
 # State Machine Configuration Template
-
+role:
+  name: wonderland_restaurant_guide
 # Define the states of the state machine
 states:
   - name: initial

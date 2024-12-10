@@ -59,6 +59,7 @@ def test_agent_from_template():
             "src.core.entity.role.Role.from_template"
         ) as mock_role_from_template:
             mock_role = Role(
+                name="test role",
                 states={
                     "start": State(
                         name="start",
@@ -144,6 +145,7 @@ def test_set_state(mock_role):
 
 def test_init_agent_invalid_state():
     invalid_role = Role(
+        name="test role",
         states={
             "invalid": State(
                 name="invalid",

@@ -17,7 +17,7 @@ class IntentDetectService:
         self.llm_service = llm_service
         self.prompt_service = prompt_service
 
-    def detect_intent_with_args(self, response_format, **kwargs):
+    def detect_intent_with_args(self, response_format: type, **kwargs) -> type:
         """Detect intent without a raw query"""
         prompt = self.prompt_service.build_prompt_from_template(
             "intent_detection", **kwargs
