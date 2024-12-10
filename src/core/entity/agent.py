@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 import yaml
-from pydantic import BaseModel
 
 from core.entity.response import AgentResponse
 from core.entity.role import Role, State
 from service import service_center
 from utils.logging import logging
+from utils.response_type import EventActions
 
 logger = logging.getLogger(__name__)
 
@@ -170,11 +170,6 @@ class Agent:
                 "event_list": self.current_state.get_formatted_event_list(),
             }
 
-            class EventActions(BaseModel):
-                """Model for event-action detection response."""
-
-                name: str
-
             event: EventActions = (
                 service_center.intent_detection_service.detect_intent_with_args(
                     EventActions, **args
@@ -212,23 +207,28 @@ class Agent:
                     error=f"No matching actions found for event {event.name} in state {self.current_state.name}",
                 )
 
-            actions = filtered_actions
-
             # Step 3: Execute actions
             responses = []
-            for _, action in actions.items():
+            for _, action in filtered_actions.items():
                 response = action()
                 responses.append(response)
 
-            # Step 4: Update the current state
+            # Step 4: Update the current state // TODO - Update based on the action's effect
             self.current_state.mark_completed()
 
-            # Get next state based on transitions and transition to it
+            # Step 4.1 Get next state based on transitions and transition to it
             transitions = self.current_state.get_transitions()
             if transitions:
-                # Get highest priority transition
-                next_state = max(transitions, key=lambda t: t.priority).to
-                self.transition_to(next_state)
+                # Filter transitions based on conditions
+                valid_transitions = [
+                    t
+                    for t in transitions
+                    if self._check_condition(t.condition, event.name)
+                ]
+                if valid_transitions:
+                    # Get highest priority transition
+                    next_transition = max(valid_transitions, key=lambda t: t.priority)
+                    self.transition_to(next_transition.to)
             # Step 5: Return the response as an AgentResponse
             return AgentResponse(message="; ".join(responses), success=True)
 
@@ -239,3 +239,29 @@ class Agent:
                 success=False,
                 error=str(e),
             )
+
+    def _check_condition(self, condition: str, event_name: str) -> bool:
+        """Check if a given condition is met.
+
+        Args:
+            condition: The condition to check.
+            event_name: The name of the event to compare with the condition.
+
+        Returns:
+            bool: True if the condition is met, False otherwise.
+        """
+        # Check if the condition matches the event name
+        if condition == event_name:
+            return True
+        # Add more conditions as needed
+        return False
+
+    def _is_information_collected(self) -> bool:
+        """Check if the information has been collected."""
+        # Implement the logic to determine if information is collected
+        return True  # Placeholder
+
+    def _is_collection_failed(self) -> bool:
+        """Check if the information collection has failed."""
+        # Implement the logic to determine if collection failed
+        return False  # Placeholder

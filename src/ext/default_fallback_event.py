@@ -1,7 +1,11 @@
 """Default fallback event for the restaurant domain"""
 
+from utils.logging import logging
+
+logger = logging.getLogger(__name__)
+
 
 def gently_ask_for_relevant_information() -> str:
     """gently_ask_for_relevant_information() -> None"""
-    print("Target is not asking for restaurant information")
+    logger.info("<Target is asking info that not related to this role>")
     return "True"

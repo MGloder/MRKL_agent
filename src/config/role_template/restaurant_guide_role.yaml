@@ -17,25 +17,32 @@ states:
         - name: ask_credit_card_type_issuer
         - name: ask_price_range
         - name: ask_rating_range
-    #        - name: ask_customize_preferences
+      #        - name: ask_customize_preferences
       default_fallback_event:
         - name: gently_ask_for_relevant_information
     transitions:
       - to: restaurant_recommendation
         priority: 1
-        condition: information_collected
+        condition: collect_info
       - to: error
-        condition: collection_failed
+        condition: default_fallback_event
         priority: 0
 
   - name: restaurant_recommendation
     state_type: action
+    event_actions:
+      make_recommendation:
+        - name: generate_recommendation
+      modify_preferences:
+        - name: transit_to_information_collection
+      default_fallback_event:
+        - name: gently_ask_for_relevant_information
     transitions:
       - to: restaurant_detail_retrieval
-        condition: details_requested
+        condition: make_recommendation
         priority: 1
       - to: information_collection
-        condition: request_to_update_filter_criteria
+        condition: modify_preferences
         priority: 2
       - to: error
         condition: recommendation_failed
@@ -86,5 +93,9 @@ properties:
     description: "End state indicating an error occurred."
   collect_info:
     description: "Target is trying to find a restaurant"
+  make_recommendation:
+    description: "Asking for restaurant recommendations"
+  modify_preferences:
+    description: "Target want to change the restaurant preferences"
   default_fallback_event:
     description: "Target is not trying to find a restaurant"
