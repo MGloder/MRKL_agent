@@ -1,13 +1,12 @@
 prompt: |
   Agent Name: {agent_name}
   Agent Description: {agent_description}
-  Agent Goal: {agent_goal}
   Agent Current state: {current_state}
   Request from target: {raw_query}
-  Event list options:
+  Event list:
     {event_list}
 
-  Task: return one or more events from the event list above; name only
+  Task: Based on the target's request return one from the event list; if the request is not related with event then return default_fallback_event; event name only
 
 parameters:
   agent_name:

@@ -1,4 +1,4 @@
-from core.entity.state import State, Action, Transition, StateStatus
+from core.entity.state import State, Action, Transition, StateStatus, Event
 
 
 def test_state_initialization():
@@ -25,11 +25,12 @@ def test_get_actions_for_event():
         Action(name="action1", description="First action"),
         Action(name="action2", description="Second action"),
     ]
+
     state = State(
         name="test_state",
         state_type="normal",
         description="Test state",
-        event_actions={"test_event": actions},
+        event_actions={"test_event": Event(description="test_event", actions=actions)},
         transitions=[],
     )
 

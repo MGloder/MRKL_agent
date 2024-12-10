@@ -19,9 +19,11 @@ def main():
     )
 
     try:
-        user_query = "I want to find a restaurant in San Francisco"
-        agent = user_engagement_service.get_agent_with_engagement_id(engagement_id)
-        result = agent.interact(user_query)
+        user_query = "I want to find a good restaurant in the city"
+        restaurant_guide_agent = user_engagement_service.get_agent_with_engagement_id(
+            engagement_id
+        )
+        result = restaurant_guide_agent.interact(user_query)
         logger.info("Interaction result: %s", str(result))
 
     except Exception as e:

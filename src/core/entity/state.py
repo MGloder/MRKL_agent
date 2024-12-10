@@ -30,13 +30,21 @@ class Transition:
 
 
 @dataclass
+class Event:
+    """Data class representing an event with a description and associated actions."""
+
+    description: str
+    actions: List[Action]
+
+
+@dataclass
 class State:
     """Data class representing a state with its description, events/actions, and status."""
 
     name: str
     state_type: str
     description: str
-    event_actions: Dict[str, List[Action]]
+    event_actions: Dict[str, Event]
     transitions: List[Transition]
     status: StateStatus = StateStatus.NOT_STARTED
 
@@ -45,7 +53,7 @@ class State:
         name: str,
         state_type: str,
         description: str,
-        event_actions: Dict[str, List[Action]],
+        event_actions: Dict[str, Event],
         transitions: List[Transition],
         status: StateStatus = StateStatus.NOT_STARTED,
     ):
@@ -53,7 +61,7 @@ class State:
 
         Args:
             description: Description of what this state represents
-            event_actions: Dictionary mapping events to lists of possible actions
+            event_actions: Dictionary mapping events to Event objects
             status: Current status of the state (defaults to NOT_STARTED)
         """
         self.name = name
@@ -72,7 +80,8 @@ class State:
         Returns:
             List of actions associated with the event, or empty list if event not found
         """
-        return self.event_actions.get(event, [])
+        event_obj = self.event_actions.get(event)
+        return event_obj.actions if event_obj else []
 
     def update_status(self, new_status: StateStatus) -> None:
         """Update the status of this state.
@@ -89,15 +98,20 @@ class State:
             A formatted string of actions associated with the event
         """
         result = ""
-        for index, (event, actions) in enumerate(self.event_actions.items()):
-            result = (
-                result
-                + f"{index + 1}. Event: {event}: Actions: {', '.join(action.name for action in actions)}"
+        for index, (event, event_obj) in enumerate(self.event_actions.items()):
+            result += (
+                f"{index + 1}. Event: {event}, Description: {event_obj.description}\n"
             )
-            if index != len(self.event_actions.items()) - 1:
-                result = result + "\n"
-        return result
+        return result.strip()
 
     def get_formatted_current_state(self):
         """Get the formatted current state"""
         return f"State Name: {self.name}, Description: {self.description}"
+
+    def mark_completed(self):
+        """Mark the state as completed."""
+        self.status = StateStatus.COMPLETED
+
+    def get_transitions(self) -> List[Transition]:
+        """Get the transitions for the state."""
+        return self.transitions

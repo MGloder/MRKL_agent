@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 import yaml
+from pydantic import BaseModel
 
 from core.entity.response import AgentResponse
 from core.entity.role import Role, State
@@ -166,22 +167,52 @@ class Agent:
                 "agent_goal": self.goal,
                 "current_state": self.current_state.get_formatted_current_state(),
                 "raw_query": user_query,
-                "event_list": self.get_current_state().get_formatted_event_list(),
+                "event_list": self.current_state.get_formatted_event_list(),
             }
-            event = service_center.intent_detection_service.detect_intent_with_args(
-                **args
+
+            class EventActions(BaseModel):
+                """Model for event-action detection response."""
+
+                name: str
+
+            event: EventActions = (
+                service_center.intent_detection_service.detect_intent_with_args(
+                    EventActions, **args
+                )
             )
 
-            # Step 2: Find action with event from the event-action registry
+            # Step 2: Find action with event from the event-action registry & filter based on the role's requriements
             actions = service_center.event_action_registry.get_actions_from_scope(
-                scope=event
+                scope=event.name
             )
             if not actions:
                 return AgentResponse(
-                    message=f"No actions found for event: {event.action_name}",
+                    message=f"No actions found for event: {event.name}",
                     success=False,
-                    error=f"No actions found for event: {event.action_name}",
+                    error=f"No actions found for event: {event.name}",
                 )
+            # Filter actions based on the current state's event actions
+            current_state_actions = self.current_state.event_actions.get(event.name, [])
+            if not current_state_actions:
+                return AgentResponse(
+                    message=f"Event {event.name} not allowed in current state",
+                    success=False,
+                    error=f"Event {event.name} not allowed in current state {self.current_state.name}",
+                )
+
+            filtered_actions = {}
+            for action_config in current_state_actions.actions:
+                if action_config.name in actions:
+                    filtered_actions[action_config.name] = actions[action_config.name]
+
+            if not filtered_actions:
+                return AgentResponse(
+                    message=f"No matching actions found for event {event.name} in current state",
+                    success=False,
+                    error=f"No matching actions found for event {event.name} in state {self.current_state.name}",
+                )
+
+            actions = filtered_actions
 
             # Step 3: Execute actions
             responses = []
@@ -190,7 +221,14 @@ class Agent:
                 responses.append(response)
 
             # Step 4: Update the current state
+            self.current_state.mark_completed()
 
+            # Get next state based on transitions and transition to it
+            transitions = self.current_state.get_transitions()
+            if transitions:
+                # Get highest priority transition
+                next_state = max(transitions, key=lambda t: t.priority).to
+                self.transition_to(next_state)
             # Step 5: Return the response as an AgentResponse
             return AgentResponse(message="; ".join(responses), success=True)
 

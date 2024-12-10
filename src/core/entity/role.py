@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from core.entity.state import State, Transition, Action
+from core.entity.state import State, Transition, Action, Event
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
@@ -118,6 +118,8 @@ class RoleTemplateParser:
         """Parse the YAML template file and populate the states and properties"""
         with open(self.template_path, "r", encoding="utf-8") as f:
             template = yaml.safe_load(f)
+        # Parse properties
+        self.properties = template.get("properties", {})
 
         # Parse states
         for state_data in template["states"]:
@@ -128,8 +130,14 @@ class RoleTemplateParser:
 
             event_actions = {}
             if "event_actions" in state_data:
-                for event, actions in state_data["event_actions"].items():
-                    event_actions[event] = [Action(**action) for action in actions]
+                for event_name, event_data in state_data["event_actions"].items():
+                    actions = [Action(**action) for action in event_data]
+                    description = self.properties.get(event_name, {}).get(
+                        "description", ""
+                    )
+                    event_actions[event_name] = Event(
+                        description=description, actions=actions
+                    )
 
             state = State(
                 name=state_data["name"],
@@ -140,9 +148,6 @@ class RoleTemplateParser:
             )
 
             self.states[state.name] = state
-
-        # Parse properties
-        self.properties = template.get("properties", {})
 
         # Add descriptions to states
         for state_name, state in self.states.items():

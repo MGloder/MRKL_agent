@@ -16,7 +16,9 @@ states:
         - name: ask_credit_card_type_issuer
         - name: ask_price_range
         - name: ask_rating_range
-        - name: ask_customize_preferences
+    #        - name: ask_customize_preferences
+      default_fallback_event:
+        - name: gently_ask_for_relevant_information
     transitions:
       - to: restaurant_recommendation
         priority: 1
@@ -75,7 +77,13 @@ properties:
     description: "Recommending a restaurant based on collected information."
   restaurant_detail_retrieval:
     description: "Retrieving details of the recommended restaurant."
+  gently_ask_for_relevant_information:
+    description: "Gently asking the user for relevant information."
   success:
     description: "End state indicating a successful process."
   error:
     description: "End state indicating an error occurred."
+  collect_info:
+    description: "Target is trying to find a restaurant"
+  default_fallback_event:
+    description: "Target is not trying to find a restaurant"
