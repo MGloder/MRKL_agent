@@ -177,35 +177,7 @@ class Agent:
             )
 
             # Step 2: Find action with event from the event-action registry & filter based on the role's requriements
-            actions = service_center.event_action_registry.get_actions_from_scope(
-                scope=event.name
-            )
-            if not actions:
-                return AgentResponse(
-                    message=f"No actions found for event: {event.name}",
-                    success=False,
-                    error=f"No actions found for event: {event.name}",
-                )
-            # Filter actions based on the current state's event actions
-            current_state_actions = self.current_state.event_actions.get(event.name, [])
-            if not current_state_actions:
-                return AgentResponse(
-                    message=f"Event {event.name} not allowed in current state",
-                    success=False,
-                    error=f"Event {event.name} not allowed in current state {self.current_state.name}",
-                )
-
-            filtered_actions = {}
-            for action_config in current_state_actions.actions:
-                if action_config.name in actions:
-                    filtered_actions[action_config.name] = actions[action_config.name]
-
-            if not filtered_actions:
-                return AgentResponse(
-                    message=f"No matching actions found for event {event.name} in current state",
-                    success=False,
-                    error=f"No matching actions found for event {event.name} in state {self.current_state.name}",
-                )
+            filtered_actions = self.filter_pre_authorized_actions(event)
 
             # Step 3: Execute actions
             responses = []
@@ -217,18 +189,8 @@ class Agent:
             self.current_state.mark_completed()
 
             # Step 4.1 Get next state based on transitions and transition to it
-            transitions = self.current_state.get_transitions()
-            if transitions:
-                # Filter transitions based on conditions
-                valid_transitions = [
-                    t
-                    for t in transitions
-                    if self._check_condition(t.condition, event.name)
-                ]
-                if valid_transitions:
-                    # Get highest priority transition
-                    next_transition = max(valid_transitions, key=lambda t: t.priority)
-                    self.transition_to(next_transition.to)
+            self.transit_to_next_state(event)
+
             # Step 5: Return the response as an AgentResponse
             return AgentResponse(message="; ".join(responses), success=True)
 
@@ -239,6 +201,34 @@ class Agent:
                 success=False,
                 error=str(e),
             )
+
+    def transit_to_next_state(self, event):
+        """Transit to the next state based on the event."""
+        transitions = self.current_state.get_transitions()
+        if transitions:
+            # Filter transitions based on conditions
+            valid_transitions = [
+                t for t in transitions if self._check_condition(t.condition, event.name)
+            ]
+            if valid_transitions:
+                # Get highest priority transition
+                next_transition = max(valid_transitions, key=lambda t: t.priority)
+                self.transition_to(next_transition.to)
+
+    def filter_pre_authorized_actions(self, event) -> dict:
+        """Filter actions based on the current state's event actions."""
+        actions = service_center.event_action_registry.get_actions_from_scope(
+            scope=event.name
+        )
+
+        # Filter actions based on the current state's event actions
+        current_state_actions = self.current_state.event_actions.get(event.name, [])
+
+        filtered_actions = {}
+        for action_config in current_state_actions.actions:
+            if action_config.name in actions:
+                filtered_actions[action_config.name] = actions[action_config.name]
+        return filtered_actions
 
     def _check_condition(self, condition: str, event_name: str) -> bool:
         """Check if a given condition is met.
@@ -255,13 +245,3 @@ class Agent:
             return True
         # Add more conditions as needed
         return False
-
-    def _is_information_collected(self) -> bool:
-        """Check if the information has been collected."""
-        # Implement the logic to determine if information is collected
-        return True  # Placeholder
-
-    def _is_collection_failed(self) -> bool:
-        """Check if the information collection has failed."""
-        # Implement the logic to determine if collection failed
-        return False  # Placeholder
