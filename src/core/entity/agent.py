@@ -1,6 +1,6 @@
 """Agent entity module."""
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List, Dict
 
 import yaml
 
@@ -8,7 +8,6 @@ from core.entity.response import AgentResponse
 from core.entity.role import Role, State
 from service import service_center
 from utils.logging import logging
-from utils.response_type import EventActions
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +22,7 @@ class Agent:
     role: Role
     current_state: Optional[State] = None
     engagement_id: Optional[str] = None
+    conversation_history: List[Dict] = None
 
     def __init__(
         self, goal, agent_name, description, role, current_state, engagement_id=None
@@ -34,6 +34,7 @@ class Agent:
         self.role = role
         self.current_state = current_state
         self.engagement_id = engagement_id
+        self.conversation_history = []
         self._init_agent()
 
     @classmethod
@@ -161,38 +162,17 @@ class Agent:
         """
         try:
             # Step 1: Get the event from the raw query with intent detection
-            args = {
-                "agent_name": self.name,
-                "agent_description": self.description,
-                "agent_goal": self.goal,
-                "current_state": self.current_state.get_formatted_current_state(),
-                "raw_query": user_query,
-                "event_list": self.current_state.get_formatted_event_list(),
-            }
+            # args = {
+            #     "agent_name": self.name,
+            #     "agent_description": self.description,
+            #     "agent_goal": self.goal,
+            #     "current_state": self.current_state.get_formatted_current_state(),
+            #     "raw_query": user_query,
+            #     "event_list": self.current_state.get_formatted_event_list(),
+            # }
+            self.conversation_history.append({"role": "user", "content": user_query})
 
-            event: EventActions = (
-                service_center.intent_detection_service.detect_intent_with_args(
-                    EventActions, **args
-                )
-            )
-
-            # Step 2: Find action with event from the event-action registry & filter based on the role's requriements
-            filtered_actions = self.filter_pre_authorized_actions(event)
-
-            # Step 3: Execute actions
-            responses = []
-            for _, action in filtered_actions.items():
-                response = action()
-                responses.append(response)
-
-            # Step 4: Update the current state // TODO - Update based on the action's effect
-            self.current_state.mark_completed()
-
-            # Step 4.1 Get next state based on transitions and transition to it
-            self.transit_to_next_state(event)
-
-            # Step 5: Return the response as an AgentResponse
-            return AgentResponse(message="; ".join(responses), success=True)
+            return AgentResponse(message="; ".join([]), success=True)
 
         except Exception as e:  # pylint:disable=broad-exception-caught
             logger.error("Error during interaction: %s", str(e))

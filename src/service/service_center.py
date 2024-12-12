@@ -6,7 +6,6 @@ from typing import Optional
 import dotenv
 
 from service.event_action_registry import EventActionRegistry
-from service.intent_detect_service import IntentDetectService
 from src.service.llm_service import AdHocInference
 from src.service.prompt_service import PromptService
 
@@ -17,18 +16,22 @@ class ServiceCenter:
 
     _llm_service: AdHocInference
     _prompt_service: PromptService
-    _intent_detect_service: IntentDetectService
     _event_action_registry: EventActionRegistry
-
-    @property
-    def intent_detection_service(self):
-        """Detect intent from the given message."""
-        return self._intent_detect_service
 
     @property
     def event_action_registry(self):
         """Get the event action registry."""
         return self._event_action_registry
+
+    @property
+    def llm_service(self):
+        """Get the language model service."""
+        return self._llm_service
+
+    @property
+    def prompt_service(self):
+        """Get the prompt service."""
+        return self._prompt_service
 
 
 @dataclass
@@ -37,7 +40,6 @@ class ServiceCenterInitializer:
 
     llm_service: AdHocInference
     prompt_service: PromptService
-    intent_detect_service: IntentDetectService
 
     @classmethod
     def initialize(cls, openai_api_key: Optional[str] = None) -> ServiceCenter:
@@ -56,12 +58,10 @@ class ServiceCenterInitializer:
 
         prompts = PromptService()
 
-        intent_detect = IntentDetectService(llm_service=llm, prompt_service=prompts)
         event_action_registry = EventActionRegistry()
 
         return ServiceCenter(
             _llm_service=llm,
             _prompt_service=prompts,
-            _intent_detect_service=intent_detect,
             _event_action_registry=event_action_registry,
         )
