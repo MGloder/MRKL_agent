@@ -1,4 +1,5 @@
 """Agent entity module."""
+import json
 from dataclasses import dataclass
 from typing import Optional, List, Dict
 
@@ -8,6 +9,7 @@ from core.entity.response import AgentResponse
 from core.entity.role import Role, State
 from service import service_center
 from utils.logging import logging
+from utils.tools import function_to_json
 
 logger = logging.getLogger(__name__)
 
@@ -148,31 +150,48 @@ class Agent:
             if next_state:
                 self.current_state = next_state
 
+        # Init conversation history
+        self.conversation_history.append(
+            {
+                "role": "system",
+                "content": service_center.prompt_service.get_start_prompt_by_role(
+                    self.role.name
+                ),
+            }
+        )
+
     def interact(self, user_query: str) -> AgentResponse:
         """
-        Interact with the user involve 5 steps:
-        1. Get the event from the raw query with intent detection
-        2. Find action with event from the event-action registry
-        3. Execute actions
-        4. Update the current state
-        5. Return the response
-
-        :param user_query:
+        Interact with the user:
+            Step 1. get response from the raw query
+            Step 2. check if there are tools_call in the response
+                Step 2.1. if there are tools_call, execute the tools_call
+                Step 2.2. collect the execution result
+            Step 3. Create Agent response
+        :param user_query: user input
         :return: AgentResponse
         """
         try:
-            # Step 1: Get the event from the raw query with intent detection
-            # args = {
-            #     "agent_name": self.name,
-            #     "agent_description": self.description,
-            #     "agent_goal": self.goal,
-            #     "current_state": self.current_state.get_formatted_current_state(),
-            #     "raw_query": user_query,
-            #     "event_list": self.current_state.get_formatted_event_list(),
-            # }
             self.conversation_history.append({"role": "user", "content": user_query})
-
-            return AgentResponse(message="; ".join([]), success=True)
+            agent_response = AgentResponse(message="", success=True)
+            params = {"messages": self.conversation_history, "tools": self.get_tools()}
+            response = service_center.llm_service.completions(**params)
+            logger.debug("Response from LLM: %s", response)
+            if response.tool_calls:
+                for tool_call in response.tool_calls:
+                    function_response = self.execute_functions(tool_call)
+                    logger.debug("Function response: %s", function_response)
+                    agent_response.message += f"Function name: {tool_call.function.name}: {function_response};\n"
+                agent_response_message = service_center.llm_service.ad_hoc_completion(
+                    f"extract the key information and return in bullet for user: {agent_response.message}"
+                )
+                agent_response.message = agent_response_message
+            else:
+                agent_response.message = response.content
+            self.conversation_history.append(
+                {"role": "assistant", "content": response.content}
+            )
+            return agent_response
 
         except Exception as e:  # pylint:disable=broad-exception-caught
             logger.error("Error during interaction: %s", str(e))
@@ -225,3 +244,28 @@ class Agent:
             return True
         # Add more conditions as needed
         return False
+
+    def get_tools(self) -> List:
+        """Get the tools available for the current state."""
+        ret = []
+        for scope in self.current_state.event_actions.keys():
+            actions = service_center.event_action_registry.get_actions_from_scope(
+                scope=scope
+            )
+            for _, func in actions.items():
+                ret.append(function_to_json(func))
+        return ret
+
+    def execute_functions(self, tool_call) -> str:
+        """Execute the function from the tool call."""
+        function = tool_call.function
+        ret = {}
+        for scope in self.current_state.event_actions.keys():
+            actions = service_center.event_action_registry.get_actions_from_scope(
+                scope=scope
+            )
+            for name, func in actions.items():
+                ret[name] = func
+        if function.name in ret:
+            return ret[function.name](**json.loads(function.arguments))
+        return "Function not found"

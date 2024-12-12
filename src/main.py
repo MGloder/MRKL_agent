@@ -17,14 +17,15 @@ def main():
         role_template_path=role_template_path,
         target_template_path=target_template_path,
     )
-
+    restaurant_guide_agent = user_engagement_service.get_agent_with_engagement_id(
+        engagement_id
+    )
     try:
-        user_query = "Something random"
-        restaurant_guide_agent = user_engagement_service.get_agent_with_engagement_id(
-            engagement_id
-        )
-        result = restaurant_guide_agent.interact(user_query)
-        logger.info("Interaction result: %s", str(result))
+        while True:
+            user_query = input("User: ")
+            result = restaurant_guide_agent.interact(user_query)
+            logger.info("Interaction result: %s", str(result))
+            print("Agent: ", result)
 
     except Exception as e:
         logger.error("Failed to initialize agent: %s", str(e), exc_info=True)

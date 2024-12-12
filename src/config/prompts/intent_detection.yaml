@@ -8,6 +8,8 @@ prompt: |
 
   Task: Based on the target's request return one from the event list; if the request is not related with event then return default_fallback_event; event name only
 
+type: generic
+
 parameters:
   agent_name:
     description: Name of the agent

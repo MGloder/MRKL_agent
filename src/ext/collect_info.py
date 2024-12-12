@@ -1,35 +1,14 @@
 """This module contains functions that simulate the process of collecting user information."""
-
+from utils import tools
 from utils.logging import logging
 
 logger = logging.getLogger(__name__)
 
 
-def ask_geo_location() -> str:
-    """ask_geo_location() -> None"""
-    logger.info("Asking for geographical location...")
-    return "True"
-
-
-def ask_credit_card_type_issuer() -> str:
-    """ask_credit_card_type_issuer() -> None"""
-    logger.info("Asking for credit card type and issuer...")
-    return "True"
-
-
-def ask_price_range() -> str:
-    """ask_price_range() -> None"""
-    logger.info("Asking for price range...")
-    return "True"
-
-
-def ask_rating_range() -> str:
-    """ask_rating_range() -> None"""
-    logger.info("Asking for rating range...")
-    return "True"
-
-
-def ask_customize_preferences() -> str:
-    """ask_customize_preferences() -> None"""
-    logger.info("Asking to customize preferences...")
-    return "True"
+def collect_information(
+    location: str, rating_range: str, custom_preference: str
+) -> dict:
+    """Collect information from the user and return the restaurant information"""
+    query = f"Restaurant, Location: {location}, Rating: {rating_range}, Preference: {custom_preference}"
+    logger.info("Get restaurant information based on the query: %s", query)
+    return tools.make_google_place_api_call(query=query)

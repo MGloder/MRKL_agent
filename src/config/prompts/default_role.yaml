@@ -1,0 +1,5 @@
+prompt: |
+  Role Name: Helpful assistant
+  Role Description: you are a helpful assistant agent.
+
+type: role

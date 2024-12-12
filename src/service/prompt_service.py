@@ -28,6 +28,7 @@ class PromptService:
         """
         self.prompt_template_dir = prompt_template_dir
         self.prompt_templates: Dict[str, Dict] = {}
+        self.role_prompts: Dict[str, Dict] = {}
         self._load_prompt_templates()
 
     def _load_prompt_templates(self) -> None:
@@ -42,7 +43,11 @@ class PromptService:
                 template_path = os.path.join(self.prompt_template_dir, filename)
                 with open(template_path, "r", encoding="utf-8") as file:
                     template_name = os.path.splitext(filename)[0]
-                    self.prompt_templates[template_name] = yaml.safe_load(file)
+                    template = yaml.safe_load(file)
+                    if template.get("type", "") == "role":
+                        self.role_prompts[template_name] = template
+                    else:
+                        self.prompt_templates[template_name] = template
 
     def get_prompt(self, template_name: str, **kwargs) -> str:
         """Get a formatted prompt using the specified template and parameters.
@@ -128,3 +133,8 @@ class PromptService:
         template_params = {**context_params, **kwargs}
 
         return self.get_prompt(template_name, **template_params)
+
+    def get_start_prompt_by_role(self, role: str) -> str:
+        """Load the start prompt for the agent's role."""
+        template = self.role_prompts.get(role, {"prompt": "you are a helpful agent"})
+        return template.get("prompt")

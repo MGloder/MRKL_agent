@@ -13,13 +13,8 @@ states:
     state_type: action
     event_actions:
       collect_info:
-        - name: ask_geo_location
-        - name: ask_credit_card_type_issuer
-        - name: ask_price_range
-        - name: ask_rating_range
-      #        - name: ask_customize_preferences
-      default_fallback_event:
-        - name: gently_ask_for_relevant_information
+        - name: collect_information
+        - name: collect_customize_preferences
     transitions:
       - to: restaurant_recommendation
         priority: 1

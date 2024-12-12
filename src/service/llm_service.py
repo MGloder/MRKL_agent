@@ -11,15 +11,21 @@ class AdHocInference:
         """Initialize the ad-hoc inference module with the OpenAI API key and configuration."""
         self.client = OpenAI(api_key=api_key, **config)
 
-    def completions(self, prompt: str, model: str = "gpt-4o-mini") -> str:
+    def completions(self, messages: List, **kwargs) -> str:
+        """Generate completions from the given prompt."""
+        params = {"model": "gpt-4o", "messages": messages}
+        updated_params = {**params, **kwargs}
+
+        completions = self.client.chat.completions.create(**updated_params)
+        result = completions.choices[0].message
+        return result
+
+    def ad_hoc_completion(self, prompt: str, model: str = "gpt-4o") -> str:
         """Generate completions from the given prompt."""
         completions = self.client.chat.completions.create(
             model=model,
             messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
+                {"role": "user", "content": prompt},
             ],
         )
         result = completions.choices[0].message.content
