@@ -6,6 +6,8 @@ from typing import Optional
 import dotenv
 
 from service.event_action_registry import EventActionRegistry
+from service.memory_cache_service import MemoryCacheService
+
 from src.service.llm_service import AdHocInference
 from src.service.prompt_service import PromptService
 
@@ -17,6 +19,7 @@ class ServiceCenter:
     _llm_service: AdHocInference
     _prompt_service: PromptService
     _event_action_registry: EventActionRegistry
+    _memory_cache_service: MemoryCacheService
 
     @property
     def event_action_registry(self):
@@ -32,6 +35,11 @@ class ServiceCenter:
     def prompt_service(self):
         """Get the prompt service."""
         return self._prompt_service
+
+    @property
+    def memory_cache_service(self):
+        """Get the memory cache service."""
+        return self._memory_cache_service
 
 
 @dataclass
@@ -55,13 +63,13 @@ class ServiceCenterInitializer:
         api_key = openai_api_key or os.environ.get("OPENAI_API_KEY", "")
 
         llm = AdHocInference(api_key=api_key, config={})
-
         prompts = PromptService()
-
         event_action_registry = EventActionRegistry()
+        memory_cache_service = MemoryCacheService()
 
         return ServiceCenter(
             _llm_service=llm,
             _prompt_service=prompts,
             _event_action_registry=event_action_registry,
+            _memory_cache_service=memory_cache_service,
         )

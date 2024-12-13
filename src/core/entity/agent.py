@@ -208,15 +208,24 @@ class Agent:
 
                 # Store task results in message
                 agent_response.message = {"task_results": task_results}
+                # Update event and action status in MemoryCacheService
+                self.update_action_status(task_results)
+
             else:
                 # Use direct LLM response if no tool calls
                 agent_response.message = {"llm_message": response.content}
 
             # Update conversation history with assistant's response
             self.conversation_history.append(
-                {"role": "assistant", "content": response.content}
+                {
+                    "role": "assistant",
+                    "content": agent_response.get_message.get(
+                        "llm_message", "request fulfilled!"
+                    ),
+                }
             )
 
+            self.transit_to_next_state()
             return agent_response
 
         except Exception as e:  # pylint:disable=broad-exception-caught
@@ -227,13 +236,13 @@ class Agent:
                 error=str(e),
             )
 
-    def transit_to_next_state(self, event):
+    def transit_to_next_state(self):
         """Transit to the next state based on the event."""
         transitions = self.current_state.get_transitions()
         if transitions:
             # Filter transitions based on conditions
             valid_transitions = [
-                t for t in transitions if self._check_condition(t.condition, event.name)
+                t for t in transitions if self._check_condition(t.condition)
             ]
             if valid_transitions:
                 # Get highest priority transition
@@ -255,21 +264,25 @@ class Agent:
                 filtered_actions[action_config.name] = actions[action_config.name]
         return filtered_actions
 
-    def _check_condition(self, condition: str, event_name: str) -> bool:
+    def _check_condition(self, event_condition: str) -> bool:
         """Check if a given condition is met.
 
         Args:
-            condition: The condition to check.
-            event_name: The name of the event to compare with the condition.
+            event_condition: The condition to check.
 
         Returns:
             bool: True if the condition is met, False otherwise.
         """
-        # Check if the condition matches the event name
-        if condition == event_name:
-            return True
-        # Add more conditions as needed
-        return False
+        # Check if all action have been executed
+        all_actions_executed = True
+        for action in self.current_state.event_actions.get(event_condition, {}).actions:
+            status = service_center.memory_cache_service.get_status(
+                event_condition, action.name
+            )
+            if status != TaskStatus.COMPLETED:
+                all_actions_executed = False
+                break
+        return all_actions_executed
 
     def _get_tools(self) -> List:
         """Get the tools available for the current state."""
@@ -314,3 +327,13 @@ class Agent:
         return TaskResponse(
             status=TaskStatus.FAILED, returned_object={"error": "Function not found"}
         )
+
+    def update_action_status(self, task_results: List[Dict]) -> None:
+        """Update the status of the actions in the MemoryCacheService."""
+        # {"task_name": tool_call.function.name, "result": task_response}
+        for task_result in task_results:
+            action_name = task_result["task_name"]
+            task_response: TaskResponse = task_result["result"]
+            service_center.memory_cache_service.set_status_with_state(
+                self.current_state, action_name, task_response.get_status
+            )

@@ -22,6 +22,9 @@ def main():
     )
     try:
         while True:
+            logger.debug(
+                "Agent current state: %s", restaurant_guide_agent.current_state
+            )
             user_query = input("User: ")
             result = restaurant_guide_agent.interact(user_query)
             logger.debug("Interaction result: %s", str(result))

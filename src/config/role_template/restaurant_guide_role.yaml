@@ -14,14 +14,10 @@ states:
     event_actions:
       collect_info:
         - name: collect_information
-        - name: collect_customize_preferences
     transitions:
       - to: restaurant_recommendation
         priority: 1
         condition: collect_info
-      - to: error
-        condition: default_fallback_event
-        priority: 0
 
   - name: restaurant_recommendation
     state_type: action

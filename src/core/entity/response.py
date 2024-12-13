@@ -95,7 +95,7 @@ class AgentResponse:
         return self.success
 
     @property
-    def get_message(self) -> str:
+    def get_message(self) -> dict:
         """Get the response message.
 
         Returns:
