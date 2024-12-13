@@ -24,8 +24,20 @@ def main():
         while True:
             user_query = input("User: ")
             result = restaurant_guide_agent.interact(user_query)
-            logger.info("Interaction result: %s", str(result))
-            print("Agent: ", result)
+            logger.debug("Interaction result: %s", str(result))
+
+            # Print agent response
+            if result.is_success:
+                if "llm_message" in result.message:
+                    print("Agent:", result.message["llm_message"])
+                elif "task_results" in result.message:
+                    print("Agent: Task Results:")
+                    for task_result in result.message["task_results"]:
+                        print(
+                            f"  - {task_result['task_name']}: {task_result['result']}"
+                        )
+            else:
+                print("Agent Error:", result.error)
 
     except Exception as e:
         logger.error("Failed to initialize agent: %s", str(e), exc_info=True)

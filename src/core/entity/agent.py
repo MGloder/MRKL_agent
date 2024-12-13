@@ -5,7 +5,7 @@ from typing import Optional, List, Dict
 
 import yaml
 
-from core.entity.response import AgentResponse
+from core.entity.response import AgentResponse, TaskResponse, TaskStatus
 from core.entity.role import Role, State
 from service import service_center
 from utils.logging import logging
@@ -168,35 +168,61 @@ class Agent:
                 Step 2.1. if there are tools_call, execute the tools_call
                 Step 2.2. collect the execution result
             Step 3. Create Agent response
-        :param user_query: user input
-        :return: AgentResponse
+
+        Args:
+            user_query: user input
+
+        Returns:
+            AgentResponse: The response containing message, success status, and task responses
         """
         try:
+            # Add user query to conversation history
             self.conversation_history.append({"role": "user", "content": user_query})
-            agent_response = AgentResponse(message="", success=True)
-            params = {"messages": self.conversation_history, "tools": self.get_tools()}
+
+            # Initialize agent response
+            agent_response = AgentResponse(message={}, success=True)
+
+            # Get LLM response
+            params = {"messages": self.conversation_history, "tools": self._get_tools()}
             response = service_center.llm_service.completions(**params)
             logger.debug("Response from LLM: %s", response)
+
+            # Handle tool calls if present
             if response.tool_calls:
+                task_results = []
                 for tool_call in response.tool_calls:
-                    function_response = self.execute_functions(tool_call)
-                    logger.debug("Function response: %s", function_response)
-                    agent_response.message += f"Function name: {tool_call.function.name}: {function_response};\n"
-                agent_response_message = service_center.llm_service.ad_hoc_completion(
-                    f"extract the key information and return in bullet for user: {agent_response.message}"
-                )
-                agent_response.message = agent_response_message
+                    task_response = self.execute_functions(tool_call)
+                    logger.debug("Function response: %s", task_response)
+
+                    # Add task response to agent response
+                    agent_response.add_task_response(task_response)
+
+                    # Handle failed task
+                    if task_response.status == TaskStatus.FAILED:
+                        agent_response.success = False
+
+                    # Collect successful results with task name
+                    task_results.append(
+                        {"task_name": tool_call.function.name, "result": task_response}
+                    )
+
+                # Store task results in message
+                agent_response.message = {"task_results": task_results}
             else:
-                agent_response.message = response.content
+                # Use direct LLM response if no tool calls
+                agent_response.message = {"llm_message": response.content}
+
+            # Update conversation history with assistant's response
             self.conversation_history.append(
                 {"role": "assistant", "content": response.content}
             )
+
             return agent_response
 
         except Exception as e:  # pylint:disable=broad-exception-caught
             logger.error("Error during interaction: %s", str(e))
             return AgentResponse(
-                message="An error occurred during interaction.",
+                message={"default": "An error occurred during interaction."},
                 success=False,
                 error=str(e),
             )
@@ -245,7 +271,7 @@ class Agent:
         # Add more conditions as needed
         return False
 
-    def get_tools(self) -> List:
+    def _get_tools(self) -> List:
         """Get the tools available for the current state."""
         ret = []
         for scope in self.current_state.event_actions.keys():
@@ -256,8 +282,15 @@ class Agent:
                 ret.append(function_to_json(func))
         return ret
 
-    def execute_functions(self, tool_call) -> str:
-        """Execute the function from the tool call."""
+    def execute_functions(self, tool_call) -> TaskResponse:
+        """Execute the function from the tool call.
+
+        Args:
+            tool_call: The tool call containing the function to execute
+
+        Returns:
+            TaskResponse: The response containing the execution status and result
+        """
         function = tool_call.function
         ret = {}
         for scope in self.current_state.event_actions.keys():
@@ -266,6 +299,18 @@ class Agent:
             )
             for name, func in actions.items():
                 ret[name] = func
+
         if function.name in ret:
-            return ret[function.name](**json.loads(function.arguments))
-        return "Function not found"
+            try:
+                result = ret[function.name](**json.loads(function.arguments))
+                return TaskResponse(
+                    status=TaskStatus.COMPLETED, returned_object={"result": result}
+                )
+            except Exception as e:  # pylint: disable=broad-except
+                return TaskResponse(
+                    status=TaskStatus.FAILED, returned_object={"error": str(e)}
+                )
+
+        return TaskResponse(
+            status=TaskStatus.FAILED, returned_object={"error": "Function not found"}
+        )
