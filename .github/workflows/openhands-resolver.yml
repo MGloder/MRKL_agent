@@ -175,14 +175,6 @@ jobs:
               repo: context.repo.repo,
               body: `[OpenHands](https://github.com/All-Hands-AI/OpenHands) started fixing the ${issueType}! You can monitor the progress [here](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).`
             });
-      # Install R, the package dependencies, and roxygen2
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::roxygen2
-
       - name: Install OpenHands
         env:
           REVIEW_BODY: ${{ github.event.review.body }}
