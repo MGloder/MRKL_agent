@@ -209,7 +209,8 @@ jobs:
             --issue-number ${{ env.ISSUE_NUMBER }} \
             --issue-type ${{ env.ISSUE_TYPE }} \
             --max-iterations ${{ env.MAX_ITERATIONS }} \
-            --comment-id ${{ env.COMMENT_ID }}
+            --comment-id ${{ env.COMMENT_ID }} \
+            --runtime-container-image "ghcr.io/all-hands-ai/runtime:0.18-nikolaik"
 
       - name: Check resolution result
         id: check_result
