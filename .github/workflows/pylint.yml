@@ -25,3 +25,10 @@ jobs:
       - name: Pytest
         run: |
           pytest
+      - name: Test
+        run: |
+          echo "::group::completion_func"
+          echo "test1"
+          echo "test2"
+          echo "::endgroup::"
+          echo "test3"
