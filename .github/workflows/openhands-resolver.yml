@@ -182,16 +182,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           LABEL_NAME: ${{ github.event.label.name }}
         run: |
-          if [[ "$LABEL_NAME" == "fix-me-experimental" ]] ||
-             [[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
-             [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]] ||
-             [[ "$EVENT_NAME" == "pull_request_review" ]] &&
-             [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]; then
-            python -m pip install --upgrade pip
             pip install git+https://github.com/all-hands-ai/openhands.git
-          else
-            python -m pip install --upgrade -r requirements.txt
-          fi
       - name: Attempt to resolve issue
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN || github.token }}
